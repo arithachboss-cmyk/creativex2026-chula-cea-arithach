@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://creativex2026-sharing.vercel.app/sitemap.xml

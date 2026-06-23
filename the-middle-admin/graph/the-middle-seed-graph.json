@@ -1,0 +1,118 @@
+{
+  "project": "The Middle",
+  "thai_name": "เดอะมิดเดิ้ล",
+  "version": "0.1",
+  "created": "2026-06-23",
+  "nodes": [
+    {
+      "id": "ORG-001",
+      "type": "Organization",
+      "name": "The Middle",
+      "name_th": "เดอะมิดเดิ้ล",
+      "tagline": "ตัวกลางแห่งทุกสรรพสิ่ง"
+    },
+    {
+      "id": "PRJ-001",
+      "type": "Project",
+      "name": "The Middle Intelligence Platform"
+    },
+    {
+      "id": "LOC-001",
+      "type": "Location",
+      "name": "Pref Sathorn"
+    },
+    {
+      "id": "CON-001",
+      "type": "Concept",
+      "name": "The Middle",
+      "name_th": "เดอะมิดเดิ้ล"
+    },
+    {
+      "id": "CON-002",
+      "type": "Concept",
+      "name": "Middle Intelligence Layer"
+    },
+    {
+      "id": "CON-003",
+      "type": "Concept",
+      "name": "Manas",
+      "name_th": "มานัส"
+    },
+    {
+      "id": "CON-004",
+      "type": "Concept",
+      "name": "Mindfulness",
+      "name_th": "สติ"
+    },
+    {
+      "id": "CON-005",
+      "type": "Concept",
+      "name": "Wisdom",
+      "name_th": "ปัญญา"
+    },
+    {
+      "id": "SRC-001",
+      "type": "Source",
+      "name": "The Middle official website",
+      "url": "https://the-middle-th.github.io/the-middle/"
+    },
+    {
+      "id": "SRC-002",
+      "type": "Source",
+      "name": "กายคตาสติ reference video",
+      "url": "https://youtu.be/QwcYXM4gSBA"
+    }
+  ],
+  "edges": [
+    {
+      "from": "ORG-001",
+      "to": "PRJ-001",
+      "type": "owns_or_sponsors"
+    },
+    {
+      "from": "ORG-001",
+      "to": "CON-001",
+      "type": "embodies"
+    },
+    {
+      "from": "PRJ-001",
+      "to": "CON-002",
+      "type": "implements"
+    },
+    {
+      "from": "CON-003",
+      "to": "CON-004",
+      "type": "leads_to"
+    },
+    {
+      "from": "CON-004",
+      "to": "CON-005",
+      "type": "leads_to"
+    },
+    {
+      "from": "SRC-001",
+      "to": "ORG-001",
+      "type": "references"
+    },
+    {
+      "from": "SRC-002",
+      "to": "CON-003",
+      "type": "references"
+    },
+    {
+      "from": "SRC-002",
+      "to": "CON-004",
+      "type": "references"
+    },
+    {
+      "from": "SRC-002",
+      "to": "CON-005",
+      "type": "references"
+    },
+    {
+      "from": "LOC-001",
+      "to": "ORG-001",
+      "type": "reference_location_for"
+    }
+  ]
+}

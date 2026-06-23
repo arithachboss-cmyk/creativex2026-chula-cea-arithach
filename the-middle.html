@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Middle | เดอะมิดเดิ้ล</title>
+    <meta
+      name="description"
+      content="The Middle / เดอะมิดเดิ้ล ระบบกลางสำหรับเชื่อมโยงข้อมูล องค์ความรู้ เอกสาร ความสัมพันธ์ และการตัดสินใจ"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #172126;
+        --muted: #5d6a72;
+        --line: #d6dedb;
+        --paper: #ffffff;
+        --wash: #f3f7f3;
+        --deep: #193d3b;
+        --green: #2c6d58;
+        --gold: #c8943a;
+        --blue: #285f7a;
+        --red: #9e4b3e;
+        --shadow: 0 18px 48px rgba(18, 37, 40, 0.13);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, "Noto Sans Thai", sans-serif;
+        color: var(--ink);
+        background: var(--wash);
+        line-height: 1.62;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 14px clamp(18px, 4vw, 64px);
+        background: rgba(255, 255, 255, 0.9);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(14px);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 210px;
+      }
+
+      .mark {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        color: white;
+        background: var(--deep);
+        border-radius: 8px;
+        font-weight: 700;
+      }
+
+      .brand strong,
+      .brand span {
+        display: block;
+        line-height: 1.2;
+      }
+
+      .brand span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .nav a {
+        padding: 8px 10px;
+        border-radius: 8px;
+      }
+
+      .nav a:hover {
+        color: var(--ink);
+        background: #e8efec;
+      }
+
+      main {
+        overflow: hidden;
+      }
+
+      .hero {
+        min-height: calc(100vh - 68px);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
+        align-items: center;
+        gap: clamp(24px, 5vw, 68px);
+        padding: clamp(42px, 7vw, 86px) clamp(18px, 5vw, 72px) 46px;
+        background:
+          linear-gradient(90deg, rgba(16, 39, 39, 0.88), rgba(21, 55, 50, 0.67)),
+          url("data:image/png;base64,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30UQ0YMEAhISHat2+f/vWvf2n58uVq3bq1PvnkE11//fW66qqrNGDAAO3bt0/9+vXTwYMHdfr0aZk9AwBq2CJAfPDBB7rxxhu1du1a3XHHHfrmm2/0zjvv6NixY/r888/1yiuv6NChQ+rVq5d27typCRMm6JlnntGqVav0+OOP6+2339bUqVM1bNgw/fDDD7r++uvVqVMn3XPPPdqzZ49mzZql1atX6+GHH9bChQt15pln6tixY7r66qv1+uuv6+DBg/rxxx/VrVu3NG7cOL344ovq6+vTsGHD9Pjjj+vpp5/Wli1btH//fvXq1UsPPvigXn31VY0ePVqTJ0/WypUrtW/fPk2bNk1btmzRwoULtW7dOv3000/6+OOP9eabb2rHjh26+eab9fLLL+vKK6/UvHnz9Pjjj+vuu+/W8OHDtXLlSt199926//77tW3bNvXq1UuPPvqo/v73v+u1117T1KlT9dZbb2nXrl2aO3eupk+frttuu01DhgzR4sWLtW7dOo0bN06TJk3SihUr9Pbbb2vZsmX67LPP1KFDh/TQQw/p8ccf1w033KCHH35YixYt0uHDh7Vq1SqtW7dO69at05gxYzR27Fh99dVXatKkiW6//Xb17dtXhYWF6tOnj5YtW6bRo0fr+OOPV1hYqOzsbK1atUrbtm3Tpk2bdOaZZ+rs2bPq0qWLbr75ZvXv31+PPvqozK4BAPSDlALl5+fr1Vdf1WuvvaY5c+Zo3759Wr16tQ4fPqynn35a27dv1+7du7V//36lp6dr/fr1WrlypSZMmKDNmzfr8OHDuvzyy/XUU0/p3nvv1cMPP6x77rlHw4YN0+TJkzV58mS9+OKLWrVqlb788kuNGTNGixYt0tixY7V69WqVlZWpX79+WrlypU6dOqU1a9YoLi5O69at0+zZs/XSSy/pwIEDevTRR3X69GmdO3dORUVFmj17tp588knNnDlT+/bt0+zZs3XDDTfo+OOP1+HDh/X222/r3Xff1fTp0/XRRx/p2LFjGj58uO644w7NmzdP69at08KFC/Xhhx/qhRde0P79+7Vx40YtX75c9913n959912tW7dOTz/9tMaNG6cHH3xQX331lWbOnKmNGzdq8+bNWrlypSZNmqQZM2bo/vvv18iRI7V+/Xpt2LBBX331lZ5++mkdPHhQX331lVauXKnVq1dr+fLlWr58uV555RVNnDhRW7Zs0QsvvKAwGAzv2QEA0EwIESDGjBmjzZs3a/369Ro0aJCmTZumwYMH68EHH9S+ffu0d+9ezZo1S6dOnZKZmamqqiqtX79ezz77rG688Ubt27dPs2bN0oEDB7R48WLdfffdWr16tRYtWqSFCxfq9ttv1/z58zV16lQdPnxYixcv1vXXX69t27Zp2rRpWrNmjZYtW6Zp06YpKytLQ4cO1cSJE/XKK6+or69P77//vqZNm6aVK1dq1qxZ+v7773XNNdfovvvuU2lpqZ577jn17dtX//rXv/Txxx+rQ4cO6tSpk/Ly8rR//37t27dPBw8e1MMPP6xFixbpjDPO0O7du3X48GHt379fU6dO1YABA/Tss8/q7Nmzqqur0+23366vv/5aQ4YM0bfffqvPP/9c33//vQoKCnTq1Cl17dpVp06d0hVXXKHHH39cQ4cO1e23367HH39cY8eO1fPPP6+oqChlZmbq7bff1lVXXaU5c+bo4sWL6t27t0aPHq2tW7fq8OHD6tKlixYvXqzNmzfrk08+0e23366xY8dq3bp1Gj16tK688kpFRUVp5MiR2rt3r2bOnKmRI0fq+eef14wZM3TXXXfp8OHDysrK0qJFi/TFF1/o559/1sMPP6wDBw5o0qRJmjx5ssaPH68zZ86oVatWmjp1qg4dOqQFCxbo7rvv1qFDh/TOO+/oww8/1C+//KKBAweqZ8+e+vTTT3XLLbdozJgxys3N1cyZM/Xdd9/pnXfe0YIFC/TSSy/pzJkzNWrUKIWEhOjAgQOaN2+eZs2apXnz5rK7BQDkWAABgNOnT+upp57S008/rQkTJmjXrl168MEH9cUXX+jGG2/UunXrNHz4cP3www/69NNPNW/ePJ07d04TJ07Uww8/rL1792rNmjU6fPiwpk+frr179+rNN9/UH//4R/3jH//QjBkzNGPGDB04cEBz585VY2OjbrzxRk2ePFmvvfaaqlevrhUrVuj48eP6+uuvdcstt2jYsGHatm2bHn74YZ0/f16TJk3S3Llz9eOPP2rJkiVavXq1li1bpgMHDmjUqFHau3ev3n77bR0+fFhPP/20FixYoHnz5unQoUP68ssv1bZt2/T111/rlltu0dSpU7Vjxw7t3LlTb775pqKiojR9+nT9+OOP+uGHH/Tkk0/qnXfe0eHDh/X888/rhRde0NixY7VlyxZNmDBBmzZt0vfff68pU6Zo5syZuvfee/XOO+/o+PHj+uijj/TFF1/o1Vdf1aZNm/TUU0/p2LFj+vDDD7Vw4ULt2rVLDz/8sG655Rb16tVL0dHRuvLKK/XWW2+pX79+Kiws1P3336+NGzdq0qRJmjt3rmbOnKmxY8fq4Ycf1s6dO7Vlyxb17dtX48aN0/3336+8vDz99NNPevLJJ7V3716lp6fr9ttv1+HDh3XNNdfowIEDmjdvnoYNG6Ynn3xS48eP1+eff65nnnlGP/74o9LS0vTAAw/ooYce0mOPPaazZ89qypQp2rFjh2bOnKnRo0fr3//+tyZMmKA777xTaWlp2rZtm6KiohQZGakDBw5o7ty5Gj58uAYPHqzWrVvr6aef1osvvqgHHnhAxcXF+v7773XLLbfozJkzcrsHAKRiGgAAAAAhGAAAAABCMABAABCEYACAAAELQAEShDhw7Vrl27qg8AACgqkALFxcVJSEhIdn7g4OCUlpbK4BoAAFD5IyQAAEAwAkAAAIRgAIAAAQjAAQAAAhGAAAAABCMABAABCEYACAAAELQAESo9PT1lZWUpKysrs1MAAAChEAhHh0qlUllZWe70AQAAQhOIR0tNTU2lpaUyugQAAJwPhAYAAAAjAAQAAAhGAAAAABCMABAABCEYACAAAELYAkf8d2bBvKwMt+jgAAAAASUVORK5CYII=");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .hero h1 {
+        max-width: 920px;
+        margin: 0;
+        color: white;
+        font-size: clamp(48px, 8.5vw, 112px);
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      .hero .thai {
+        margin: 16px 0 0;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: clamp(22px, 3vw, 36px);
+        font-weight: 700;
+      }
+
+      .hero .statement {
+        max-width: 760px;
+        margin: 28px 0 0;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: clamp(18px, 2vw, 24px);
+      }
+
+      .hero-panel {
+        align-self: stretch;
+        display: grid;
+        align-content: center;
+        gap: 14px;
+        padding: 28px;
+        color: white;
+        background: rgba(8, 28, 28, 0.54);
+        border: 1px solid rgba(255, 255, 255, 0.23);
+        border-radius: 8px;
+        backdrop-filter: blur(12px);
+      }
+
+      .hero-panel p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .metric {
+        min-height: 92px;
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 28px;
+        line-height: 1.1;
+      }
+
+      .metric span {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 13px;
+      }
+
+      .section {
+        padding: 72px clamp(18px, 5vw, 72px);
+      }
+
+      .section:nth-child(even) {
+        background: white;
+      }
+
+      .section-head {
+        max-width: 760px;
+        margin-bottom: 30px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--gold);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(30px, 5vw, 54px);
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        line-height: 1.25;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .lead {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .flow-step {
+        min-height: 132px;
+        padding: 16px;
+        color: white;
+        background: var(--deep);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+      }
+
+      .flow-step:nth-child(2) {
+        background: var(--green);
+      }
+
+      .flow-step:nth-child(3) {
+        background: var(--blue);
+      }
+
+      .flow-step:nth-child(4) {
+        background: #5d6142;
+      }
+
+      .flow-step:nth-child(5) {
+        background: var(--red);
+      }
+
+      .flow-step:nth-child(6) {
+        background: #735a25;
+      }
+
+      .flow-step:nth-child(7) {
+        background: #233233;
+      }
+
+      .flow-step span {
+        display: block;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        min-height: 190px;
+        padding: 22px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 12px 36px rgba(31, 53, 54, 0.08);
+      }
+
+      .section:nth-child(even) .card {
+        background: #f8fbf9;
+      }
+
+      .card p,
+      .item p {
+        color: var(--muted);
+      }
+
+      .module-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .module {
+        min-height: 118px;
+        padding: 16px;
+        background: #f8fbf9;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .module strong {
+        display: block;
+        line-height: 1.25;
+      }
+
+      .module span {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--gold);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        gap: 28px;
+        align-items: start;
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .item {
+        padding: 18px;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .section:nth-child(even) .item {
+        background: #f8fbf9;
+      }
+
+      .relation-map {
+        display: grid;
+        gap: 12px;
+        padding: 24px;
+        background: var(--deep);
+        border-radius: 8px;
+        color: white;
+      }
+
+      .relation-row {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .relation-node {
+        min-height: 54px;
+        display: grid;
+        place-items: center;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .arrow {
+        color: var(--gold);
+        font-weight: 700;
+      }
+
+      .timeline {
+        display: grid;
+        gap: 12px;
+      }
+
+      .phase {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 18px;
+        padding: 18px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .phase strong {
+        color: var(--green);
+      }
+
+      .cta {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 18px;
+        align-items: center;
+        padding: 34px;
+        color: white;
+        background: var(--deep);
+        border-radius: 8px;
+      }
+
+      .cta a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 10px 16px;
+        color: var(--ink);
+        background: white;
+        border-radius: 8px;
+        font-weight: 700;
+      }
+
+      footer {
+        padding: 26px clamp(18px, 5vw, 72px);
+        color: var(--muted);
+        background: #e8efec;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .split {
+          grid-template-columns: 1fr;
+        }
+
+        .flow {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid,
+        .module-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .nav {
+          justify-content: flex-start;
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 44px;
+        }
+
+        .hero-panel {
+          padding: 20px;
+        }
+
+        .status-grid,
+        .flow,
+        .grid,
+        .module-grid,
+        .relation-row,
+        .cta,
+        .phase {
+          grid-template-columns: 1fr;
+        }
+
+        .arrow {
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="The Middle home">
+        <span class="mark">M</span>
+        <span>
+          <strong>The Middle</strong>
+          <span>เดอะมิดเดิ้ล</span>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#model">Model</a>
+        <a href="#intelligence">AI Layer</a>
+        <a href="#modules">Modules</a>
+        <a href="#graph">Graph</a>
+        <a href="#roadmap">Roadmap</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <p class="eyebrow">Central Knowledge Organization</p>
+          <h1 id="hero-title">The Middle</h1>
+          <p class="thai">เดอะมิดเดิ้ล</p>
+          <p class="statement">องค์กร เดอะมิดเดิ้ล คือ ตัวกลางแห่งทุกสรรพสิ่ง</p>
+        </div>
+
+        <aside class="hero-panel" aria-label="Admin status">
+          <p class="eyebrow">Admin Agent Seed v0.1</p>
+          <h2>Middle Intelligence Layer</h2>
+          <p>
+            ชั้นกลางที่ช่วยรวมข้อมูล จัดระบบเอกสาร เชื่อมโยงความสัมพันธ์
+            สร้าง timeline และเตรียมฐานความรู้ระยะยาว โดยไม่แทนที่อำนาจตัดสินใจของมนุษย์
+          </p>
+          <div class="status-grid" aria-label="Seed metrics">
+            <div class="metric">
+              <strong>10</strong>
+              <span>knowledge graph nodes</span>
+            </div>
+            <div class="metric">
+              <strong>10</strong>
+              <span>relationship edges</span>
+            </div>
+            <div class="metric">
+              <strong>14</strong>
+              <span>admin files</span>
+            </div>
+            <div class="metric">
+              <strong>0.1</strong>
+              <span>foundation version</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section" id="model">
+        <div class="section-head">
+          <p class="eyebrow">Philosophical Model</p>
+          <h2>จากความจริง สู่ปัญญา และกลับมาเป็นระบบกลาง</h2>
+          <p class="lead">
+            The Middle ใช้แนวคิด Reality → Data → Body → Manas → Mindfulness → Wisdom → The Middle
+            เพื่อเปลี่ยนข้อมูลกระจัดกระจายให้เป็นความรู้ที่ตรวจสอบได้
+          </p>
+        </div>
+
+        <div class="flow" aria-label="Philosophical flow">
+          <div class="flow-step"><span>01</span><strong>Reality</strong></div>
+          <div class="flow-step"><span>02</span><strong>Data</strong></div>
+          <div class="flow-step"><span>03</span><strong>Body / กาย</strong></div>
+          <div class="flow-step"><span>04</span><strong>Manas / มานัส</strong></div>
+          <div class="flow-step"><span>05</span><strong>Mindfulness / สติ</strong></div>
+          <div class="flow-step"><span>06</span><strong>Wisdom / ปัญญา</strong></div>
+          <div class="flow-step"><span>07</span><strong>The Middle</strong></div>
+        </div>
+      </section>
+
+      <section class="section" id="intelligence">
+        <div class="section-head">
+          <p class="eyebrow">AI Role</p>
+          <h2>AI เป็นตัวกลางของข้อมูล ไม่ใช่ผู้ตัดสินความจริง</h2>
+          <p class="lead">
+            ระบบช่วยรวบรวม จัดหมวด เชื่อมโยง วิเคราะห์เบื้องต้น และเปิดช่องให้มนุษย์ตรวจสอบเสมอ
+          </p>
+        </div>
+
+        <div class="grid">
+          <article class="card">
+            <h3>Knowledge Aggregation</h3>
+            <p>รวมเว็บไซต์ วิดีโอ เอกสาร บันทึก เหตุการณ์ และหลักฐานให้เข้าสู่ทะเบียนกลางเดียวกัน</p>
+          </article>
+          <article class="card">
+            <h3>Semantic Linking</h3>
+            <p>เชื่อม person, organization, location, case, document, evidence, event และ concept เข้าด้วยกัน</p>
+          </article>
+          <article class="card">
+            <h3>Decision Support</h3>
+            <p>สรุปทางเลือก ความเสี่ยง ช่องว่างของข้อมูล และคำถามเปิด เพื่อให้มนุษย์ตัดสินใจบนฐานข้อมูลที่ชัดขึ้น</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="modules">
+        <div class="section-head">
+          <p class="eyebrow">Future Modules</p>
+          <h2>จากคลังความรู้ ไปสู่ operating system ขององค์กร</h2>
+        </div>
+
+        <div class="module-grid">
+          <div class="module"><span>01</span><strong>Knowledge Base</strong></div>
+          <div class="module"><span>02</span><strong>Legal Case Tracking</strong></div>
+          <div class="module"><span>03</span><strong>Organization Registry</strong></div>
+          <div class="module"><span>04</span><strong>Timeline Engine</strong></div>
+          <div class="module"><span>05</span><strong>Knowledge Graph</strong></div>
+          <div class="module"><span>06</span><strong>AI Research Assistant</strong></div>
+          <div class="module"><span>07</span><strong>Document Archive</strong></div>
+          <div class="module"><span>08</span><strong>Intelligence Dashboard</strong></div>
+          <div class="module"><span>09</span><strong>Relationship Mapping</strong></div>
+          <div class="module"><span>10</span><strong>Decision Support System</strong></div>
+        </div>
+      </section>
+
+      <section class="section" id="graph">
+        <div class="split">
+          <div>
+            <p class="eyebrow">Data Structure</p>
+            <h2>โครงสร้างข้อมูลเริ่มจาก entity และ relationship</h2>
+            <p class="lead">
+              seed graph รุ่นแรกถูกสร้างไว้แล้วในโฟลเดอร์ admin เพื่อให้ระบบอื่นนำไปต่อเป็น dashboard,
+              database, graph visualization หรือ research assistant ได้
+            </p>
+          </div>
+
+          <div class="relation-map" aria-label="Relationship examples">
+            <div class="relation-row">
+              <div class="relation-node">Person</div>
+              <div class="arrow">→</div>
+              <div class="relation-node">Organization</div>
+            </div>
+            <div class="relation-row">
+              <div class="relation-node">Case</div>
+              <div class="arrow">→</div>
+              <div class="relation-node">Document</div>
+            </div>
+            <div class="relation-row">
+              <div class="relation-node">Document</div>
+              <div class="arrow">→</div>
+              <div class="relation-node">Evidence</div>
+            </div>
+            <div class="relation-row">
+              <div class="relation-node">Concept</div>
+              <div class="arrow">→</div>
+              <div class="relation-node">Concept</div>
+            </div>
+            <div class="relation-row">
+              <div class="relation-node">Organization</div>
+              <div class="arrow">→</div>
+              <div class="relation-node">Project</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="roadmap">
+        <div class="section-head">
+          <p class="eyebrow">Roadmap</p>
+          <h2>แผนพัฒนาจาก admin foundation ไปสู่ intelligence platform</h2>
+        </div>
+
+        <div class="timeline">
+          <div class="phase">
+            <strong>Phase 0</strong>
+            <p>Admin foundation: charter, brief, architecture, data model, protocol, registry, glossary.</p>
+          </div>
+          <div class="phase">
+            <strong>Phase 1</strong>
+            <p>Knowledge base: source registry, document index, entity registry, concept library, basic search.</p>
+          </div>
+          <div class="phase">
+            <strong>Phase 2</strong>
+            <p>Archive and timeline: preserve records, mark confidence, order events, track history.</p>
+          </div>
+          <div class="phase">
+            <strong>Phase 3</strong>
+            <p>Knowledge graph: relationship registry, entity pages, case maps, graph export.</p>
+          </div>
+          <div class="phase">
+            <strong>Phase 4+</strong>
+            <p>Intelligence dashboard, AI research assistant, workflows, permissions, audit trail.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="cta">
+          <div>
+            <p class="eyebrow">Admin Workspace</p>
+            <h2>พร้อมรับแหล่งข้อมูลจริงชุดแรก</h2>
+            <p>
+              ใช้ inbox template เพื่อรับเอกสารหรือ source ใหม่ จากนั้นแยก entities,
+              claims, events, evidence และ relationships เข้าสู่ registry
+            </p>
+          </div>
+          <a href="the-middle-admin/README.md">Open Admin Seed</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      The Middle / เดอะมิดเดิ้ล · ตัวกลางแห่งทุกสรรพสิ่ง · Admin Seed v0.1
+    </footer>
+  </body>
+</html>

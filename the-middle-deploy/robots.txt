@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://the-middle-th.github.io/the-middle/sitemap.xml

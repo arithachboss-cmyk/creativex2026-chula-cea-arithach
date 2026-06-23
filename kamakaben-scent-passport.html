@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kamakaben Global Scent Passport</title>
+    <meta
+      name="description"
+      content="Kamakaben Global Scent Passport ให้ผู้ใช้ทั่วโลกบันทึกความทรงจำและการเรียนรู้อัตลักษณ์ไทยผ่านกลิ่น"
+    />
+    <link rel="canonical" href="https://creativex2026-sharing.vercel.app/kamakaben-scent-passport.html" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="kamakaben-page">
+    <header class="topbar kamakaben-topbar">
+      <div>
+        <p class="eyebrow">Global Scent Passport</p>
+        <h1>Kamakaben Passport</h1>
+      </div>
+      <nav class="nav">
+        <a href="kamakaben.html">Kamakaben</a>
+        <a href="#passport">Passport</a>
+        <a href="#archive">Archive</a>
+      </nav>
+    </header>
+
+    <main class="scent-card-page">
+      <section class="scent-card-hero">
+        <p class="eyebrow">Scan. Smell. Remember. Learn.</p>
+        <h2>บันทึกความทรงจำของคุณ แล้วให้กลิ่นไทยเดินทางต่อในโลก</h2>
+        <p>
+          เลือกกลิ่นที่คุณสัมผัส เขียนความทรงจำหรือภาพที่เกิดขึ้น แล้วบันทึกเป็น passport ส่วนตัว
+          เพื่อเริ่มสร้าง archive ของการเรียนรู้อัตลักษณ์ไทยผ่านกลิ่น
+        </p>
+      </section>
+
+      <section class="section" id="passport">
+        <form id="passport-form" class="passport-form">
+          <label>
+            Scent
+            <select id="passport-scent" required>
+              <option>Rain On Teak</option>
+              <option>Jasmine At Dusk</option>
+              <option>Temple Morning</option>
+              <option>River Market</option>
+              <option>Golden Field</option>
+            </select>
+          </label>
+          <label>
+            Where are you experiencing this scent?
+            <input id="passport-place" type="text" placeholder="Bangkok, Tokyo, London, home, hotel, gallery..." required />
+          </label>
+          <label>
+            What did this scent make you remember or feel?
+            <textarea id="passport-memory" placeholder="Write your scent memory..." required></textarea>
+          </label>
+          <label>
+            What did it teach you about Thailand or yourself?
+            <textarea id="passport-learning" placeholder="Write your reflection..." required></textarea>
+          </label>
+          <div class="passport-score-grid" aria-label="Scent experience scores">
+            <label>
+              Memory Fit
+              <input id="passport-memory-fit" type="range" min="1" max="5" value="4" />
+              <span><output for="passport-memory-fit" id="memory-fit-output">4</output>/5</span>
+            </label>
+            <label>
+              Emotional Shift
+              <input id="passport-emotion" type="range" min="1" max="5" value="4" />
+              <span><output for="passport-emotion" id="emotion-output">4</output>/5</span>
+            </label>
+            <label>
+              Cultural Recall
+              <input id="passport-culture" type="range" min="1" max="5" value="4" />
+              <span><output for="passport-culture" id="culture-output">4</output>/5</span>
+            </label>
+          </div>
+          <button class="button primary" type="submit">บันทึก Passport Entry</button>
+        </form>
+      </section>
+
+      <section class="section impact-band" id="archive">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Personal Archive</p>
+            <h2>บันทึกกลิ่นของฉัน</h2>
+          </div>
+          <button id="clear-passport" class="button compact" type="button">ล้างบันทึก</button>
+        </div>
+        <div id="passport-summary" class="passport-summary" aria-label="Passport UX summary"></div>
+        <div id="passport-entries" class="passport-entries"></div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Kamakaben Global Scent Passport</span>
+      <span>Smell Thailand. Remember Yourself.</span>
+    </footer>
+    <script src="kamakaben-passport.js"></script>
+  </body>
+</html>

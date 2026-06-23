@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <title>Kamakaben UX Research Booklet</title>
+  <style>
+    @page { size: A4; margin: 18mm 16mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: #172033;
+      font-family: -apple-system, BlinkMacSystemFont, "Sukhumvit Set", "Thonburi", "Noto Sans Thai", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.58;
+      background: #fff;
+    }
+    h1, h2, h3 { margin: 0; line-height: 1.2; }
+    h1 {
+      color: #1f3a5f;
+      font-size: 34px;
+      letter-spacing: .01em;
+      margin-bottom: 10px;
+    }
+    h2 {
+      color: #2e74b5;
+      font-size: 20px;
+      margin-top: 26px;
+      margin-bottom: 10px;
+      break-after: avoid;
+    }
+    h3 {
+      color: #1f4d78;
+      font-size: 15px;
+      margin-top: 16px;
+      margin-bottom: 6px;
+    }
+    p { margin: 0 0 9px; }
+    ul, ol { margin: 6px 0 12px 22px; padding: 0; }
+    li { margin: 4px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0 18px;
+      break-inside: avoid;
+    }
+    th, td {
+      border: 1px solid #c7d0dc;
+      padding: 8px 9px;
+      vertical-align: top;
+    }
+    th {
+      background: #e8eef5;
+      color: #1f3a5f;
+      text-align: left;
+      font-weight: 700;
+    }
+    .cover {
+      min-height: 185px;
+      border-bottom: 3px solid #d8e1ed;
+      margin-bottom: 20px;
+      padding-top: 10px;
+    }
+    .subtitle {
+      color: #5b6470;
+      font-size: 17px;
+      max-width: 720px;
+      margin-bottom: 16px;
+    }
+    .meta {
+      display: inline-block;
+      color: #5c6675;
+      border: 1px solid #d8e1ed;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12px;
+    }
+    .lead {
+      background: #f4f6f9;
+      border-left: 4px solid #2e74b5;
+      padding: 12px 14px;
+      margin: 10px 0 16px;
+      font-weight: 600;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 10px 0 18px;
+    }
+    .card {
+      border: 1px solid #d8e1ed;
+      border-radius: 8px;
+      padding: 12px;
+      break-inside: avoid;
+    }
+    .label {
+      color: #2e74b5;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 4px;
+    }
+    .flow {
+      background: #fff8e5;
+      border: 1px solid #ead28a;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-weight: 700;
+      color: #4f3c00;
+    }
+    .sources li {
+      overflow-wrap: anywhere;
+      font-size: 12px;
+    }
+    .footer {
+      margin-top: 22px;
+      padding-top: 10px;
+      border-top: 1px solid #d8e1ed;
+      color: #687383;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <h1>Kamakaben UX Research Booklet</h1>
+    <p class="subtitle">เม็ดต่อของประสบการณ์ผู้ใช้: กลิ่นไทย ความจำ และการเรียนรู้เชิงวัฒนธรรม</p>
+    <p class="meta">Academic companion booklet | UX seed document | June 2026</p>
+  </section>
+
+  <h2>1. บทตั้งต้น</h2>
+  <p>เล่มนี้สรุปฐานคิดวิชาการและเม็ดต่อของประสบการณ์ผู้ใช้สำหรับ Kamakaben: แบรนด์กลิ่นไทยที่ทำให้คนทั่วโลกเรียนรู้ตัวตนของประเทศไทยผ่านกลิ่น ความทรงจำ และพิธีกรรมการเลือกกลิ่นของตนเอง</p>
+  <p class="lead">โจทย์ UX ไม่ใช่การทำหน้าน้ำหอมให้สวยเท่านั้น แต่คือการออกแบบเส้นทางที่ผู้ใช้รู้สึกว่า “กลิ่นหนึ่งกลิ่น” พาเขาเข้าใกล้ความทรงจำ สถานที่ วัฒนธรรม และตัวตนได้จริง</p>
+
+  <h2>2. สิ่งที่ถอดจากภาพอ้างอิง</h2>
+  <table>
+    <thead><tr><th>องค์ประกอบจากภาพ</th><th>ความหมายเชิง UX</th><th>สิ่งที่ควรทำใน Kamakaben</th></tr></thead>
+    <tbody>
+      <tr><td>ผสมกลิ่น 50ml</td><td>ทำให้การทดลองมีกติกาและขนาดที่จับต้องได้</td><td>สร้าง 50ml Scent Lab Ritual สำหรับเวิร์กช็อป</td></tr>
+      <tr><td>ขวดสูตร / pipette / เครื่องชั่ง</td><td>ผู้ใช้เห็นความละเอียดและความน่าเชื่อถือ</td><td>โชว์ formula note แบบเข้าใจง่าย โดยไม่เปิดสูตรลับ</td></tr>
+      <tr><td>สูตรบนเอกสารและรถเข็น sample</td><td>กลิ่นกลายเป็นระบบความรู้ ไม่ใช่ความรู้สึกลอย ๆ</td><td>ทำ scent territory card พร้อมส่วนประกอบวัฒนธรรม</td></tr>
+      <tr><td>ใบคะแนน result</td><td>ประสบการณ์กลิ่นต้องวัดผลได้</td><td>เพิ่ม Memory Fit Score และ Cultural Learning Score</td></tr>
+      <tr><td>เทียบกลิ่นกับภาพที่เลือก</td><td>ภาพเป็นตัวกระตุ้นความทรงจำก่อนกลิ่น</td><td>ให้ผู้ใช้เลือกภาพ/สถานที่/อารมณ์ก่อนเริ่ม</td></tr>
+      <tr><td>อุปกรณ์อ่านปฏิกิริยาและแบบสอบถาม</td><td>วัดทั้งความรู้สึกและร่องรอยการเรียนรู้</td><td>ใช้แบบสอบถาม UX pilot ก่อนใช้เครื่องมือชีวสัญญาณจริง</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. Benchmark: Karmakamet</h2>
+  <p>สะกดแบรนด์อ้างอิงให้ถูกต้องเป็น <strong>Karmakamet</strong>. ใช้เป็น benchmark ด้าน Thai fragrance culture, heritage, craftsmanship และประสบการณ์หน้าร้าน แต่ Kamakaben ต้องมีแกนของตัวเอง: เปิดให้ผู้ใช้ร่วมสร้างความหมายของกลิ่นไทยผ่านข้อมูล ความทรงจำ และการเรียนรู้</p>
+  <ul>
+    <li>Karmakamet สื่อสารเรื่อง scent as a tool, memory, inner world และ craftsmanship ชัดเจน</li>
+    <li>มีหมวดสินค้าและ touchpoint หลายแบบ เช่น aromatic oil, essential oil, candle, incense, dry perfume, liquid fragrance และ body care</li>
+    <li>บทเรียนสำหรับ Kamakaben คือความหนักแน่นของ narrative heritage แต่ต้องเพิ่มชั้น platform, learning dashboard และ participatory UX</li>
+  </ul>
+
+  <h2>4. ฐานวิชาการที่รองรับ</h2>
+  <table>
+    <thead><tr><th>ฐานคิด</th><th>ใจความ</th><th>แปลเป็น UX</th></tr></thead>
+    <tbody>
+      <tr><td>Odor-evoked memory</td><td>กลิ่นกระตุ้นความทรงจำและอารมณ์ได้แรงกว่าสิ่งเร้าหลายประเภท</td><td>ให้ผู้ใช้บันทึก memory note ทุกครั้งที่ดม</td></tr>
+      <tr><td>Affective design</td><td>ประสบการณ์ที่ดีต้องวัดความรู้สึก ไม่ใช่แค่ conversion</td><td>ใช้ mood before/after และ fit score</td></tr>
+      <tr><td>Scent marketing</td><td>กลิ่นช่วยสร้างการจำแบรนด์และบรรยากาศ</td><td>สร้าง signature scent territories สำหรับช่องทางออนไลน์และออฟไลน์</td></tr>
+      <tr><td>Cultural learning</td><td>การเรียนรู้เกิดเมื่อผู้ใช้เชื่อมประสบการณ์ส่วนตัวกับความหมายทางวัฒนธรรม</td><td>ใส่ story card ของวัตถุดิบ สถานที่ และพิธีกรรมไทย</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. UX Seed Model</h2>
+  <div class="grid">
+    <div class="card"><div class="label">Seed 01</div><strong>Scent Image Prompt</strong><br>เริ่มจากภาพ สถานที่ หรือความทรงจำก่อนเลือกกลิ่น</div>
+    <div class="card"><div class="label">Seed 02</div><strong>Thai Scent Territory</strong><br>เลือก territory เช่น ฝนบนไม้สัก มะลิยามค่ำ เช้าวัด ตลาดริมน้ำ ทุ่งทอง</div>
+    <div class="card"><div class="label">Seed 03</div><strong>50ml Lab Ritual</strong><br>ทำสูตรทดลองขนาดเล็กเพื่อให้ผู้ใช้เห็น craft และมี ownership</div>
+    <div class="card"><div class="label">Seed 04</div><strong>Memory Fit Score</strong><br>ให้คะแนน 1-5 ว่ากลิ่นตรงกับภาพ/ความรู้สึก/เรื่องเล่าเพียงใด</div>
+    <div class="card"><div class="label">Seed 05</div><strong>Scent Passport</strong><br>เก็บ entry เป็นประวัติการเรียนรู้ส่วนตัว</div>
+    <div class="card"><div class="label">Seed 06</div><strong>Learning Dashboard</strong><br>รวมบทความ ดาวน์โหลด จำนวนการค้นหา และ insight เพื่อพัฒนากลิ่นรอบต่อไป</div>
+  </div>
+
+  <h2>6. Prototype Flow</h2>
+  <p class="flow">เลือกภาพ → เลือก scent territory → รับ story card → ผสม/ทดลอง 50ml → ดมแบบ blind หรือ guided → ให้คะแนน → เขียน memory note → บันทึกลง Scent Passport → แชร์/ดาวน์โหลด certificate หรือ workshop sheet</p>
+
+  <h2>7. Metrics สำหรับ UX Pilot</h2>
+  <table>
+    <thead><tr><th>ตัวชี้วัด</th><th>คำถามที่วัด</th><th>ผลลัพธ์ที่ต้องการ</th></tr></thead>
+    <tbody>
+      <tr><td>Memory Fit</td><td>กลิ่นนี้ตรงกับภาพ/ความทรงจำที่เลือกแค่ไหน</td><td>เฉลี่ย 4.0/5 ขึ้นไป</td></tr>
+      <tr><td>Cultural Recall</td><td>หลังดม ผู้ใช้จำเรื่องวัฒนธรรมไทยอะไรได้</td><td>ตอบได้อย่างน้อย 1 insight</td></tr>
+      <tr><td>Emotional Shift</td><td>อารมณ์ก่อน-หลังดมเปลี่ยนอย่างไร</td><td>รู้สึกสงบ/สนใจ/เชื่อมโยงมากขึ้น</td></tr>
+      <tr><td>Share Intent</td><td>อยากแชร์ entry หรือชวนคนอื่นมาลองไหม</td><td>มากกว่า 60%</td></tr>
+      <tr><td>Repeat Path</td><td>อยากทดลอง territory อื่นต่อไหม</td><td>มากกว่า 50%</td></tr>
+    </tbody>
+  </table>
+
+  <h2>8. ข้อควรระวัง</h2>
+  <ul>
+    <li>ห้ามสื่อสารเป็นการรักษาทางการแพทย์โดยไม่มีหลักฐานและการอนุมัติที่เกี่ยวข้อง ใช้คำว่า emotional reset, reflective ritual หรือ learning experience จะปลอดภัยกว่า</li>
+    <li>ข้อมูลอารมณ์ ความทรงจำ และชีวสัญญาณเป็นข้อมูลอ่อนไหว ต้องมี consent, privacy notice และสิทธิ์ลบข้อมูล</li>
+    <li>Benchmark Karmakamet ใช้เพื่อเรียนรู้ตำแหน่งตลาดและภาษาประสบการณ์ ไม่ใช่การคัดลอกชื่อ กลิ่น ภาพ หรือ story world</li>
+  </ul>
+
+  <h2>9. เม็ดต่อที่ต้องทำทันที</h2>
+  <ol>
+    <li>เพิ่มหน้า Kamakaben Scent Lab ในเว็บไซต์</li>
+    <li>ต่อแบบฟอร์ม Memory Fit Score เข้ากับ Scent Passport</li>
+    <li>สร้าง workshop worksheet เป็น PDF/DOCX ให้ดาวน์โหลด</li>
+    <li>ทำ QR matrix จริงสำหรับ scent territory cards</li>
+    <li>เก็บ UX pilot 20 คนแรก แล้วสรุป insight เป็น dashboard</li>
+  </ol>
+
+  <h2>10. Sources</h2>
+  <ul class="sources">
+    <li>Karmakamet official website: https://karmakamet.co.th/en/</li>
+    <li>Karmakamet About: https://karmakamet.co.th/about/</li>
+    <li>Karmakamet Craftsmanship: https://karmakamet.co.th/en/craftsmanship/</li>
+    <li>Herz, R. S. (2016). The role of odor-evoked memory in psychological and physiological health. Brain Sciences. https://doi.org/10.3390/brainsci6030022</li>
+    <li>Larsson et al. (2014). Olfactory LOVER. Frontiers in Psychology. https://doi.org/10.3389/fpsyg.2014.00312</li>
+    <li>Sugiyama et al. (2015). Proustian products are preferred. Chemosensory Perception. https://doi.org/10.1007/s12078-015-9182-y</li>
+  </ul>
+
+  <p class="footer">Kamakaben UX Research Booklet | seed for user experience | prepared as an academic companion file for the next product/UX build</p>
+</body>
+</html>

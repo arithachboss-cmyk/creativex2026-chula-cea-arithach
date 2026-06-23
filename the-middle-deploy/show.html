@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Middle Show</title>
+    <style>
+      :root {
+        --ink: #f8fbf8;
+        --muted: rgba(248, 251, 248, 0.72);
+        --deep: #142e2c;
+        --gold: #c8943a;
+        --line: rgba(255, 255, 255, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        font-family: Arial, "Noto Sans Thai", sans-serif;
+        color: var(--ink);
+        background: #081817;
+      }
+
+      .stage {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        min-height: 560px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.72fr);
+        align-items: center;
+        gap: clamp(28px, 5vw, 72px);
+        padding: clamp(34px, 5vw, 76px);
+        overflow: hidden;
+        background:
+          linear-gradient(90deg, rgba(8, 22, 22, 0.96), rgba(19, 58, 51, 0.8)),
+          repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.11) 0 1px, transparent 1px 38px),
+          radial-gradient(circle at 74% 28%, rgba(200, 148, 58, 0.3), transparent 24rem),
+          var(--deep);
+      }
+
+      .stage::before {
+        content: "";
+        position: absolute;
+        inset: 8%;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        pointer-events: none;
+      }
+
+      .identity,
+      .panel,
+      .ticker {
+        position: relative;
+        z-index: 1;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        color: var(--gold);
+        font-size: clamp(14px, 1.4vw, 19px);
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(66px, 13vw, 178px);
+        line-height: 0.88;
+        letter-spacing: 0;
+      }
+
+      .thai {
+        margin: clamp(18px, 2vw, 30px) 0 0;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: clamp(30px, 5vw, 72px);
+        font-weight: 700;
+        line-height: 1.05;
+      }
+
+      .statement {
+        max-width: 920px;
+        margin: clamp(22px, 3vw, 40px) 0 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: clamp(22px, 2.4vw, 36px);
+        line-height: 1.36;
+      }
+
+      .panel {
+        display: grid;
+        gap: 18px;
+        padding: clamp(22px, 3vw, 38px);
+        background: rgba(8, 28, 28, 0.62);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        backdrop-filter: blur(14px);
+      }
+
+      .panel h2 {
+        margin: 0;
+        font-size: clamp(28px, 3vw, 50px);
+        line-height: 1.05;
+      }
+
+      .panel p {
+        margin: 0;
+        color: var(--muted);
+        font-size: clamp(16px, 1.35vw, 22px);
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        min-height: 104px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: clamp(34px, 4vw, 58px);
+        line-height: 1;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.25;
+      }
+
+      .ticker {
+        position: absolute;
+        right: clamp(24px, 5vw, 76px);
+        bottom: clamp(22px, 4vw, 50px);
+        left: clamp(24px, 5vw, 76px);
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        color: rgba(255, 255, 255, 0.68);
+        font-size: clamp(13px, 1.2vw, 18px);
+      }
+
+      @media (max-width: 920px) {
+        body {
+          overflow: auto;
+        }
+
+        .stage {
+          height: auto;
+          min-height: 100vh;
+          grid-template-columns: 1fr;
+          padding-bottom: 110px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .metrics,
+        .ticker {
+          grid-template-columns: 1fr;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage" aria-label="The Middle video showcase frame">
+      <section class="identity">
+        <p class="eyebrow">Central Knowledge Organization</p>
+        <h1>The<br />Middle</h1>
+        <p class="thai">เดอะมิดเดิ้ล</p>
+        <p class="statement">องค์กร เดอะมิดเดิ้ล คือ ตัวกลางแห่งทุกสรรพสิ่ง</p>
+      </section>
+
+      <aside class="panel">
+        <p class="eyebrow">Admin Agent Seed v0.1</p>
+        <h2>Middle Intelligence Layer</h2>
+        <p>
+          เชื่อมโยงข้อมูล จัดเก็บองค์ความรู้ วิเคราะห์ความสัมพันธ์
+          และสนับสนุนการตัดสินใจ โดยทำหน้าที่เป็นตัวกลางของข้อมูล
+        </p>
+        <div class="metrics">
+          <div class="metric"><strong>10</strong><span>graph nodes</span></div>
+          <div class="metric"><strong>10</strong><span>relationship edges</span></div>
+          <div class="metric"><strong>14</strong><span>admin files</span></div>
+          <div class="metric"><strong>0.1</strong><span>seed version</span></div>
+        </div>
+      </aside>
+
+      <div class="ticker" aria-label="Core flow">
+        <span>Reality → Data → Body → Manas</span>
+        <span>Mindfulness → Wisdom → The Middle</span>
+      </div>
+    </main>
+  </body>
+</html>

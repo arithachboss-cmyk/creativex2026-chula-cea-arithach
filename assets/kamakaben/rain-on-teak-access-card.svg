@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600" role="img" aria-label="Rain On Teak scent access card">
+  <rect width="1200" height="1600" fill="#fffaf0"/>
+  <rect x="70" y="70" width="1060" height="1460" rx="34" fill="#2f2018"/>
+  <circle cx="960" cy="260" r="170" fill="#6f4327" opacity="0.64"/>
+  <circle cx="240" cy="1320" r="220" fill="#d8a451" opacity="0.24"/>
+  <text x="130" y="170" fill="#d8a451" font-family="Arial, sans-serif" font-size="34" font-weight="700">KAMAKABEN SCENT CARD</text>
+  <text x="130" y="360" fill="#fffaf0" font-family="Arial, sans-serif" font-size="92" font-weight="800">Rain On Teak</text>
+  <text x="130" y="440" fill="#f1d08e" font-family="Arial, sans-serif" font-size="42" font-weight="700">ฝนแรกบนบ้านไม้</text>
+  <foreignObject x="130" y="560" width="850" height="170">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Arial, sans-serif; color: #fffaf0; font-size: 38px; line-height: 1.38;">Wet earth, teak wood, soft rain, warm shadow</div>
+  </foreignObject>
+  <rect x="130" y="880" width="940" height="360" rx="26" fill="#fffaf0"/>
+  <text x="180" y="970" fill="#2f2018" font-family="Arial, sans-serif" font-size="34" font-weight="800">SCAN / OPEN</text>
+  <foreignObject x="180" y="1025" width="840" height="150">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Arial, sans-serif; color: #2f2018; font-size: 31px; line-height: 1.3; word-break: break-word;">https://creativex2026-sharing.vercel.app/kamakaben-rain-on-teak.html</div>
+  </foreignObject>
+  <text x="130" y="1410" fill="#f1d08e" font-family="Arial, sans-serif" font-size="38" font-weight="800">Smell Thailand. Remember Yourself.</text>
+  <text x="130" y="1470" fill="#fffaf0" font-family="Arial, sans-serif" font-size="28">QR matrix to be generated from the URL for production print.</text>
+</svg>

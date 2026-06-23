@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thailand Sensory Intelligence Platform</title>
+    <meta name="description" content="National platform for scent intelligence, cultural identity, institutional experience, and Thailand soft power." />
+    <style>
+      :root {
+        --ink: #18212f;
+        --muted: #617084;
+        --paper: #ffffff;
+        --soft: #f4f7f5;
+        --line: #d8e0dc;
+        --forest: #17463f;
+        --teal: #1f756b;
+        --gold: #c98d2b;
+        --clay: #8b4b38;
+        --blue: #285c7d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, "Noto Sans Thai", sans-serif;
+        color: var(--ink);
+        background: var(--soft);
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding: 16px clamp(18px, 5vw, 72px);
+        background: rgba(255, 255, 255, 0.94);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(12px);
+      }
+
+      .brand strong {
+        display: block;
+        font-size: 18px;
+      }
+
+      .brand span,
+      .eyebrow,
+      .metric span,
+      .card span {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        font-weight: 700;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+        font-size: 14px;
+      }
+
+      nav a {
+        padding: 8px 10px;
+        border-radius: 8px;
+      }
+
+      nav a:hover {
+        background: #e9efec;
+      }
+
+      main {
+        width: min(1220px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .hero {
+        min-height: 650px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+        gap: 24px;
+        align-items: stretch;
+        padding: 34px 0 18px;
+      }
+
+      .hero-copy {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-height: 610px;
+        padding: clamp(28px, 5vw, 64px);
+        color: white;
+        border-radius: 8px;
+        background:
+          linear-gradient(90deg, rgba(17, 45, 41, 0.96), rgba(23, 70, 63, 0.7)),
+          url("../downloads/karmakamet-manus-benchmark-screenshot.png");
+        background-size: cover;
+        background-position: top center;
+        box-shadow: 0 24px 60px rgba(24, 33, 47, 0.16);
+      }
+
+      .hero h1 {
+        max-width: 860px;
+        margin: 0;
+        font-size: clamp(42px, 7vw, 86px);
+        line-height: 1.02;
+        letter-spacing: 0;
+      }
+
+      .hero p:not(.eyebrow) {
+        max-width: 760px;
+        margin: 22px 0 0;
+        font-size: 18px;
+      }
+
+      .panel,
+      .card,
+      .metric,
+      .table-card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .panel {
+        display: grid;
+        gap: 14px;
+        align-content: center;
+        padding: 22px;
+        box-shadow: 0 24px 60px rgba(24, 33, 47, 0.1);
+      }
+
+      .visual-note {
+        margin: 0;
+        padding: 14px;
+        border-radius: 8px;
+        background: #eef4f1;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .metric {
+        padding: 18px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 8px;
+        color: var(--forest);
+        font-size: 42px;
+        line-height: 1;
+      }
+
+      section {
+        padding: 44px 0;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 18px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(28px, 4vw, 46px);
+        line-height: 1.1;
+      }
+
+      h3 {
+        margin: 8px 0 8px;
+        font-size: 20px;
+        line-height: 1.25;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid.four {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .card p {
+        color: var(--muted);
+      }
+
+      .tagrow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .tag {
+        display: inline-flex;
+        padding: 6px 9px;
+        border-radius: 999px;
+        background: #ecf2ef;
+        color: var(--forest);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .table-card {
+        overflow: hidden;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        padding: 14px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid var(--line);
+      }
+
+      th {
+        background: #edf3f0;
+        color: var(--forest);
+      }
+
+      .band {
+        margin: 18px calc(50% - 50vw) 0;
+        padding: 52px max(16px, calc(50vw - 610px));
+        background: #172c2a;
+        color: white;
+      }
+
+      .band .card {
+        color: var(--ink);
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border-radius: 8px;
+        background: var(--gold);
+        color: #16120b;
+        font-weight: 700;
+      }
+
+      footer {
+        margin-top: 36px;
+        padding: 28px clamp(18px, 5vw, 72px);
+        background: #10201f;
+        color: white;
+      }
+
+      @media (max-width: 900px) {
+        header,
+        .section-head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .hero,
+        .grid,
+        .grid.two,
+        .grid.four {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-copy {
+          min-height: 560px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="#">
+        <span>Powered by Karmakamet + ACS</span>
+        <strong>Thailand Sensory Intelligence Platform</strong>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#archive">Archive</a>
+        <a href="#institutions">Institutions</a>
+        <a href="#platform">Platform</a>
+        <a href="#pilot">Pilot</a>
+        <a href="#business">Business</a>
+        <a href="#roadmap">Roadmap</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">National Knowledge Infrastructure</p>
+          <h1>Thailand's platform for scent, memory, trust, and soft power.</h1>
+          <p>
+            A complete sensory intelligence system for cultural scent archives, city identity,
+            institutional experience design, wellness, creative economy, and international expansion.
+          </p>
+        </div>
+        <aside class="panel" aria-label="National overview metrics">
+          <p class="visual-note">
+            Visual benchmark source: existing Karmakamet/Manus reference captured in this workspace.
+            The platform direction extends the mood into research, governance, pilots, and national infrastructure.
+          </p>
+          <div class="metric"><span>Archive Target</span><strong>500+</strong><p>reviewed scent records by year 3</p></div>
+          <div class="metric"><span>Institutional Pilots</span><strong>30</strong><p>priority deployments across public services</p></div>
+          <div class="metric"><span>Revenue Path</span><strong>212M</strong><p>THB projected annual revenue by year 3</p></div>
+          <a class="button" href="prd-and-strategy.md">Open Strategy Pack</a>
+        </aside>
+      </section>
+
+      <section id="archive">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Phase 1</p>
+            <h2>National Scent Archive</h2>
+          </div>
+          <p>Structured scent intelligence across cultural, city, institutional, wellness, heritage, and hospitality use cases.</p>
+        </div>
+        <div class="grid">
+          <article class="card"><span>Cultural</span><h3>Temple Morning</h3><p>Incense, jasmine, banana leaf, and soft morning air as a ritual of reset.</p><div class="tagrow"><b class="tag">calm</b><b class="tag">reverence</b><b class="tag">memory</b></div></article>
+          <article class="card"><span>City</span><h3>Bangkok River Market</h3><p>Herbs, citrus peel, warm timber, river air, and urban Thai movement.</p><div class="tagrow"><b class="tag">energy</b><b class="tag">tourism</b><b class="tag">place branding</b></div></article>
+          <article class="card"><span>Institutional</span><h3>Scent Of Trust</h3><p>A clean herbal civic scent for police service spaces and public-facing counters.</p><div class="tagrow"><b class="tag">trust</b><b class="tag">clarity</b><b class="tag">service</b></div></article>
+          <article class="card"><span>Wellness</span><h3>Lotus Breath</h3><p>Lotus, cool water, rice steam, and quiet woods for reflective environments.</p><div class="tagrow"><b class="tag">rest</b><b class="tag">breathing</b><b class="tag">wellness</b></div></article>
+          <article class="card"><span>Heritage</span><h3>Ancient Library Teak</h3><p>Archival paper, teak shelves, old fabric, and quiet scholarship.</p><div class="tagrow"><b class="tag">focus</b><b class="tag">heritage</b><b class="tag">knowledge</b></div></article>
+          <article class="card"><span>Hospitality</span><h3>Thai Welcome Air</h3><p>White flowers, citrus leaf, and polished wood for premium arrival experiences.</p><div class="tagrow"><b class="tag">arrival</b><b class="tag">hospitality</b><b class="tag">soft power</b></div></article>
+        </div>
+      </section>
+
+      <section id="institutions">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Phase 2</p>
+            <h2>Institutional Scent Framework</h2>
+          </div>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr><th>Institution</th><th>Strategic Objective</th><th>Psychological Goal</th><th>Core KPI</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Police Stations</td><td>Build civic trust</td><td>Calm, safety, procedural fairness</td><td>Trust Score, Satisfaction, Recall</td></tr>
+              <tr><td>Hospitals</td><td>Support dignity and calm</td><td>Lower anxiety perception</td><td>Waiting satisfaction, staff acceptance</td></tr>
+              <tr><td>Airports</td><td>Create national arrival identity</td><td>Welcome, confidence, anticipation</td><td>Arrival sentiment, brand recall</td></tr>
+              <tr><td>Universities</td><td>Strengthen learning atmosphere</td><td>Focus, curiosity, belonging</td><td>Focus self-report, alumni recall</td></tr>
+              <tr><td>Government Centers</td><td>Improve public-service experience</td><td>Patience, clarity, fairness</td><td>NPS, queue satisfaction, complaints</td></tr>
+              <tr><td>Museums</td><td>Deepen cultural interpretation</td><td>Curiosity, immersion, recall</td><td>Dwell time, learning score</td></tr>
+              <tr><td>Smart Cities</td><td>Build district sensory identity</td><td>Belonging, comfort, civic pride</td><td>Visitor sentiment, business uplift</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="platform" class="band">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Phases 3-4</p>
+            <h2>Digital Platform And AI Agents</h2>
+          </div>
+          <a class="button" href="technical-architecture.md">Open Technical Architecture</a>
+        </div>
+        <div class="grid">
+          <article class="card"><span>Module</span><h3>Knowledge Library</h3><p>Validated frameworks, briefs, case studies, and policy references.</p></article>
+          <article class="card"><span>Module</span><h3>Scent Intelligence Database</h3><p>Scent profiles, ingredients, cultural meanings, and deployment history.</p></article>
+          <article class="card"><span>Module</span><h3>Impact Evaluation</h3><p>Baseline, midpoint, post-deployment, trust, recall, and economic value metrics.</p></article>
+          <article class="card"><span>Agent 01</span><h3>Research Agent</h3><p>Research scent science, global cases, and evidence-based reports.</p></article>
+          <article class="card"><span>Agent 02</span><h3>City Branding Agent</h3><p>Analyze city identity and recommend scent identity systems.</p></article>
+          <article class="card"><span>Agent 05</span><h3>Executive Brief Agent</h3><p>Generate policy briefs, board packs, and stakeholder-ready reports.</p></article>
+        </div>
+      </section>
+
+      <section id="pilot">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Phase 5</p>
+            <h2>Pilot: Police Station Signature Scent</h2>
+          </div>
+          <p>Scent Of Trust is the first public-service pilot, designed to improve perceived trust, waiting experience, and institutional identity.</p>
+        </div>
+        <div class="grid four">
+          <article class="metric"><span>KPI</span><strong>01</strong><p>Satisfaction Score</p></article>
+          <article class="metric"><span>KPI</span><strong>02</strong><p>Trust Score</p></article>
+          <article class="metric"><span>KPI</span><strong>03</strong><p>Recall Score</p></article>
+          <article class="metric"><span>KPI</span><strong>04</strong><p>Employee Engagement</p></article>
+        </div>
+      </section>
+
+      <section id="business">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Phases 6-8</p>
+            <h2>Dashboard, Business Model, International Expansion</h2>
+          </div>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <span>Revenue Streams</span>
+            <h3>Seven commercial engines</h3>
+            <p>Consulting, scent strategy, licensing, research services, government projects, international projects, and knowledge products.</p>
+          </article>
+          <article class="card">
+            <span>International Positioning</span>
+            <h3>Karmakamet as Asia's Leading Sensory Intelligence Company</h3>
+            <p>Target markets: Singapore, Japan, Korea, UAE, and the United Kingdom.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="roadmap">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">3-Year Roadmap</p>
+            <h2>From national pilot to regional infrastructure</h2>
+          </div>
+        </div>
+        <div class="grid">
+          <article class="card"><span>Year 1</span><h3>Foundation And Pilot</h3><p>Governance, archive taxonomy, Supabase MVP, first 50 records, police pilot, museum and hotel pilots.</p></article>
+          <article class="card"><span>Year 2</span><h3>National Scale</h3><p>10 cities, 30 institutions, AI assistant beta, paid reports, licensing, and institutional playbooks.</p></article>
+          <article class="card"><span>Year 3</span><h3>International Expansion</h3><p>Singapore and Japan pilots, UNESCO package, international advisory network, 500+ scent records.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <strong>Thailand Sensory Intelligence Platform</strong>
+      <p>Powered by Karmakamet + ACS. Built as a national knowledge infrastructure for scent, culture, experience, and economic value.</p>
+    </footer>
+  </body>
+</html>
