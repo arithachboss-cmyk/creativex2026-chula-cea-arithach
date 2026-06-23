@@ -12,14 +12,14 @@ Static website and project showcase for CreativEX2026, including the Kamakaben T
 
 ## GitHub Pages
 
-This repository is prepared for GitHub Pages using `.github/workflows/pages.yml`.
+This repository is prepared for GitHub Pages as a static site published from the `main` branch root.
 
 After pushing to GitHub:
 
 1. Open the repository on GitHub.
 2. Go to `Settings` -> `Pages`.
-3. Under `Build and deployment`, set `Source` to `GitHub Actions`.
-4. Push to `main` or run the workflow manually.
+3. Under `Build and deployment`, set `Source` to `Deploy from a branch`.
+4. Select `main` and `/ (root)`.
 
 GitHub will publish the website at:
 

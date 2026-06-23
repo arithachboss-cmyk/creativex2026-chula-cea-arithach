@@ -8,7 +8,6 @@ The site is ready to publish as a static GitHub Pages website.
 
 Prepared files:
 
-- `.github/workflows/pages.yml`
 - `.nojekyll`
 - `.gitignore`
 - `README.md`
@@ -32,7 +31,9 @@ Then open GitHub repository settings:
 1. `Settings`
 2. `Pages`
 3. `Build and deployment`
-4. `Source`: `GitHub Actions`
+4. `Source`: `Deploy from a branch`
+5. `Branch`: `main`
+6. Folder: `/ (root)`
 
 The published site will be:
 
