@@ -3,350 +3,269 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CreativEX2026 Knowledge Platform | Showcase</title>
+    <title>หนังสือสวดมนต์ออนไลน์ | สวดมนต์ สมาธิ ปัญญา เมตตา</title>
     <meta
       name="description"
-      content="CreativEX2026 Knowledge Platform รวมบทความ องค์ความรู้วิทยากร เครื่องมือประเมินผลกระทบ ทรัพยากรดาวน์โหลด และ Dashboard สำหรับติดตามการเรียนรู้"
+      content="คลังบทสวดมนต์ออนไลน์สำหรับทำวัตรเช้า ทำวัตรเย็น แผ่เมตตา อุทิศส่วนกุศล และฝึกสมาธิ"
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://creativex2026-sharing.vercel.app/" />
-    <meta property="og:title" content="CreativEX2026 Knowledge Platform" />
+    <meta property="og:title" content="หนังสือสวดมนต์ออนไลน์" />
     <meta
       property="og:description"
-      content="คลังความรู้และ Dashboard สำหรับ Place Branding, Creative Cities, Creative Industries และการประเมินผลกระทบ"
+      content="อ่านบทสวดมนต์ ทำวัตร แผ่เมตตา และหลักธรรมในรูปแบบหนังสือออนไลน์"
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://creativex2026-sharing.vercel.app/" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">CreativEX 2026 Chula CEA</p>
-        <h1>CreativEX2026 Knowledge Platform</h1>
-      </div>
-      <nav class="nav">
-        <a href="#dashboard">Dashboard</a>
-        <a href="#knowledge">คลังความรู้</a>
-        <a href="#speakers">วิทยากร</a>
-        <a href="#impact">Impact</a>
-        <a href="#downloads">ดาวน์โหลด</a>
-        <a href="kamakaben.html">Kamakaben</a>
-        <a href="thailand-sensory-intelligence-platform/">Sensory Intelligence</a>
-        <a href="#portfolio">Showcase</a>
+    <header class="site-header">
+      <a class="brand" href="#home" aria-label="หนังสือสวดมนต์ออนไลน์">
+        <span class="lotus" aria-hidden="true">✦</span>
+        <span>หนังสือสวดมนต์ออนไลน์</span>
+      </a>
+      <nav class="desktop-nav" aria-label="เมนูหลัก">
+        <a href="#morning">ทำวัตรเช้า</a>
+        <a href="#evening">ทำวัตรเย็น</a>
+        <a href="#important">บทสวดสำคัญ</a>
+        <a href="#merit">แผ่เมตตา</a>
+        <a href="#meditation">สมาธิ</a>
       </nav>
+      <button id="theme-toggle" class="icon-button" type="button" aria-label="โหมดกลางคืน">☾</button>
     </header>
 
-    <main>
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <p class="eyebrow">Place Branding Knowledge Showcase</p>
-          <h2 id="hero-title">แพลตฟอร์มความรู้ที่เปลี่ยนบทเรียนให้เป็นผลงานและผลกระทบ</h2>
-          <p>
-            รวมคลังความรู้ หน้าองค์ความรู้วิทยากร Search, Dashboard, Downloads และ Impact Framework
-            ไว้ในประสบการณ์เดียวที่พร้อมโชว์แนวคิดและฝีมือการออกแบบระบบ
-          </p>
-          <div class="hero-actions">
-            <a class="button primary" href="#dashboard">ดู Dashboard</a>
-            <a class="button ghost" href="#knowledge">ดูคลังความรู้</a>
-          </div>
-        </div>
-        <div class="hero-panel" aria-label="สรุปภาพรวมแพลตฟอร์ม">
-          <div>
-            <strong id="stat-resources">0</strong>
-            <span>Knowledge Articles</span>
-          </div>
-          <div>
-            <strong id="metric-downloads-hero">3</strong>
-            <span>Download Assets</span>
-          </div>
-          <div>
-            <strong id="stat-points">0</strong>
-            <span>Learning Points</span>
-          </div>
-        </div>
-      </section>
+    <div class="layout" id="home">
+      <aside class="sidebar" aria-label="สารบัญเดสก์ท็อป">
+        <a href="#home">หน้าแรก</a>
+        <a href="#morning">ทำวัตรเช้า</a>
+        <a href="#evening">ทำวัตรเย็น</a>
+        <a href="#important">บทสวดสำคัญ</a>
+        <a href="#merit">แผ่เมตตาและอุทิศส่วนกุศล</a>
+        <a href="#meditation">สมาธิและภาวนา</a>
+        <a href="#dharma">หลักธรรม</a>
+        <a href="#about">เกี่ยวกับหนังสือ</a>
+        <a href="#contact">ติดต่อ / ร่วมจัดพิมพ์</a>
+      </aside>
 
-      <section class="showcase-strip" aria-label="จุดเด่นของแพลตฟอร์ม">
-        <article>
-          <strong>Structured Knowledge</strong>
-          <span>บทความและหน้า speaker แยกตามหัวข้อสำคัญ</span>
-        </article>
-        <article>
-          <strong>Interactive Layer</strong>
-          <span>ค้นหา กรอง บันทึกกิจกรรม และติดตามคะแนน</span>
-        </article>
-        <article>
-          <strong>Deployment Ready</strong>
-          <span>มี SEO, sitemap, robots และไฟล์ดาวน์โหลดพร้อมใช้</span>
-        </article>
-      </section>
-
-      <section class="section dashboard-band" id="dashboard">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Executive Dashboard</p>
-            <h2>Dashboard ภาพรวมแพลตฟอร์ม</h2>
-          </div>
-          <a class="button compact" href="#knowledge">ไปคลังความรู้</a>
-        </div>
-        <div class="dashboard-grid" aria-label="ตัวชี้วัดภาพรวม">
-          <article class="metric-card">
-            <span>Knowledge Articles</span>
-            <strong id="metric-articles">0</strong>
-            <p>บทความและหน้าองค์ความรู้ทั้งหมด</p>
-          </article>
-          <article class="metric-card">
-            <span>Downloads</span>
-            <strong id="metric-downloads">0</strong>
-            <p>ไฟล์ PDF, DOCX และ Presentation</p>
-          </article>
-          <article class="metric-card">
-            <span>Visitors</span>
-            <strong id="metric-visitors">0</strong>
-            <p>ผู้เข้าชมในเครื่องนี้</p>
-          </article>
-          <article class="metric-card">
-            <span>Search Queries</span>
-            <strong id="metric-searches">0</strong>
-            <p>จำนวนครั้งที่ค้นหาในหน้านี้</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="workspace">
-        <aside class="member-box" id="member">
-          <h2>ระบบสมาชิก</h2>
-          <p>สมัครหรือเข้าสู่ระบบเพื่อบันทึกคะแนน ผลงาน และไฟล์ที่แบ่งปัน</p>
-          <form id="member-form" class="stacked-form">
-            <label>
-              ชื่อสมาชิก
-              <input id="member-name" name="name" type="text" placeholder="เช่น อริทัช" required />
-            </label>
-            <label>
-              บทบาท
-              <select id="member-role" name="role">
-                <option>ผู้เรียน</option>
-                <option>ผู้สอน</option>
-                <option>ผู้บริหาร</option>
-                <option>ทีมงาน</option>
-              </select>
-            </label>
-            <button class="button primary" type="submit">เข้าใช้งาน</button>
-          </form>
-          <div id="active-member" class="active-member hidden"></div>
-        </aside>
-
-        <section class="progress-box" aria-labelledby="progress-title">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Learning Score</p>
-              <h2 id="progress-title">คะแนนการเรียนรู้</h2>
+      <main>
+        <section class="cover" aria-labelledby="cover-title">
+          <div class="cover-frame">
+            <div class="thai-pattern" aria-hidden="true"></div>
+            <p class="eyebrow">ฉบับอ่านออนไลน์</p>
+            <h1 id="cover-title">หนังสือสวดมนต์ออนไลน์</h1>
+            <p class="lead">
+              สวดมนต์ สมาธิ ปัญญา เมตตา สำหรับการอ่านอย่างสงบทั้งบนมือถือและหน้าจอใหญ่
+            </p>
+            <div class="cover-footer">
+              <span>ทำวัตรเช้า</span>
+              <span>ทำวัตรเย็น</span>
+              <span>แผ่เมตตา</span>
+              <span>อุทิศส่วนกุศล</span>
             </div>
-            <button id="add-learning" class="button compact" type="button">+ บันทึกการเรียนรู้</button>
-          </div>
-          <div class="score-grid">
-            <div>
-              <span>คะแนนของฉัน</span>
-              <strong id="my-score">0</strong>
-            </div>
-            <div>
-              <span>ระดับ</span>
-              <strong id="my-level">เริ่มต้น</strong>
-            </div>
-            <div>
-              <span>กิจกรรม</span>
-              <strong id="activity-count">0</strong>
-            </div>
-          </div>
-          <div class="meter" aria-label="แถบคะแนนสู่ระดับถัดไป">
-            <span id="score-meter"></span>
           </div>
         </section>
-      </section>
 
-      <section class="section" id="knowledge">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Knowledge Library</p>
-            <h2>คลังความรู้</h2>
-          </div>
-          <div class="filter-group" role="group" aria-label="ตัวกรองหมวดหมู่">
-            <button class="chip active" data-filter="all" type="button">ทั้งหมด</button>
-            <button class="chip" data-filter="creative" type="button">สร้างสรรค์</button>
-            <button class="chip" data-filter="business" type="button">ธุรกิจ</button>
-            <button class="chip" data-filter="tech" type="button">เทคโนโลยี</button>
-            <button class="chip" data-filter="impact" type="button">Impact</button>
-          </div>
-        </div>
-        <form id="search-form" class="search-box" role="search">
-          <label>
-            ค้นหาองค์ความรู้
-            <input id="search-input" type="search" placeholder="ค้นหา เช่น UNESCO, Creative Industries, evaluation" />
+        <section class="tools" aria-label="เครื่องมืออ่าน">
+          <label class="search-box">
+            <span>ค้นหา</span>
+            <input id="search-input" type="search" placeholder="ค้นหาบทสวดหรือหลักธรรม" />
           </label>
-          <button class="button primary" type="submit">ค้นหา</button>
-        </form>
-        <p id="search-summary" class="search-summary">แสดงบทความทั้งหมด</p>
-        <div id="knowledge-list" class="card-grid"></div>
-      </section>
-
-      <section class="section" id="speakers">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Speaker Knowledge Pages</p>
-            <h2>หน้าองค์ความรู้วิทยากร</h2>
+          <div class="font-tools" aria-label="ปรับขนาดตัวอักษร">
+            <button class="icon-button" id="font-down" type="button" aria-label="ลดขนาดตัวอักษร">−</button>
+            <button class="icon-button" id="font-reset" type="button" aria-label="คืนค่าขนาดตัวอักษร">↺</button>
+            <button class="icon-button" id="font-up" type="button" aria-label="เพิ่มขนาดตัวอักษร">+</button>
           </div>
-        </div>
-        <div class="card-grid">
-          <article class="knowledge-card">
-            <span class="tag">Creative Cities</span>
-            <h3>UNESCO Creative Cities</h3>
-            <p>กรอบคิดเมืองสร้างสรรค์ เครือข่ายระดับนานาชาติ และการนำไปใช้กับยุทธศาสตร์เมือง</p>
-            <a class="text-link" href="speaker-unesco-creative-cities.html">เปิดหน้าองค์ความรู้</a>
-          </article>
-          <article class="knowledge-card">
-            <span class="tag">Organization</span>
-            <h3>Tech Driven Creative Organization</h3>
-            <p>การใช้ข้อมูล เทคโนโลยี และระบบทำงานร่วมกันเพื่อยกระดับองค์กรสร้างสรรค์</p>
-            <a class="text-link" href="speaker-tech-driven-creative-organization.html">เปิดหน้าองค์ความรู้</a>
-          </article>
-          <article class="knowledge-card">
-            <span class="tag">Creative Industries</span>
-            <h3>UK Creative Industries</h3>
-            <p>บทเรียนจากระบบนิเวศอุตสาหกรรมสร้างสรรค์ของสหราชอาณาจักรและการแปลงเป็นนโยบาย</p>
-            <a class="text-link" href="speaker-uk-creative-industries.html">เปิดหน้าองค์ความรู้</a>
-          </article>
-        </div>
-      </section>
+        </section>
 
-      <section class="section impact-band" id="impact">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Impact Evaluation</p>
-            <h2>กรอบประเมินผลกระทบ</h2>
+        <section class="category-grid" aria-label="หมวดหมู่">
+          <a href="#morning"><strong>ทำวัตรเช้า</strong><span>ลำดับบทสวดเริ่มต้นวัน</span></a>
+          <a href="#evening"><strong>ทำวัตรเย็น</strong><span>ปิดวันด้วยความสงบ</span></a>
+          <a href="#important"><strong>บทสวดสำคัญ</strong><span>นะโม อิติปิโส พาหุง</span></a>
+          <a href="#merit"><strong>แผ่เมตตา</strong><span>เมตตาและอุทิศส่วนกุศล</span></a>
+          <a href="#meditation"><strong>สมาธิ</strong><span>อานาปานสติและภาวนา</span></a>
+          <a href="#dharma"><strong>หลักธรรม</strong><span>พรหมวิหาร อริยสัจ มรรค</span></a>
+        </section>
+
+        <section class="book-page" aria-label="บทสวด">
+          <div class="toc">
+            <strong>สารบัญ</strong>
+            <div id="toc-list"></div>
           </div>
-          <a class="button compact" href="impact-evaluation-framework.html">เปิดหน้าเต็ม</a>
-        </div>
-        <div class="impact-grid">
-          <article>
-            <strong>Inputs</strong>
-            <p>ทรัพยากร คน งบประมาณ ข้อมูล และพันธมิตรที่ใช้ขับเคลื่อนโครงการ</p>
-          </article>
-          <article>
-            <strong>Activities</strong>
-            <p>เวิร์กช็อป การอบรม การอัปโหลดความรู้ การสร้างผลงาน และการรีวิว</p>
-          </article>
-          <article>
-            <strong>Outputs</strong>
-            <p>จำนวนบทความ ไฟล์ดาวน์โหลด ผลงาน สมาชิก active และกิจกรรมการเรียนรู้</p>
-          </article>
-          <article>
-            <strong>Outcomes</strong>
-            <p>ความสามารถใหม่ ความร่วมมือ คุณภาพผลงาน และการนำความรู้ไปใช้จริง</p>
-          </article>
-        </div>
-      </section>
+          <div class="reader" id="reader"></div>
+        </section>
 
-      <section class="section" id="downloads">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Downloadable Resources</p>
-            <h2>ทรัพยากรดาวน์โหลด</h2>
-          </div>
-        </div>
-        <div id="download-list" class="download-list"></div>
-      </section>
-
-      <section class="section executive-band" id="executives">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Leadership Board</p>
-            <h2>คณะผู้บริหาร</h2>
-          </div>
-        </div>
-        <div id="executive-list" class="executive-grid"></div>
-      </section>
-
-      <section class="section two-column" id="portfolio">
-        <div>
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Portfolio Studio</p>
-              <h2>Showcase Lab</h2>
-            </div>
-          </div>
-          <article class="activity-item featured-case">
-            <span class="tag">Global Thai Scent Brand</span>
-            <h3>Kamakaben: Thai Scent Culture Platform</h3>
-            <p>
-              เคสโชว์การต่อยอดกลิ่นไทยให้เป็น global brand, scent learning journey,
-              cultural rehab ritual และ soft power platform สำหรับผู้ชมทั่วโลก
-            </p>
-            <a class="button compact" href="kamakaben.html">เปิด Kamakaben Showcase</a>
-          </article>
-          <article class="activity-item featured-case">
-            <span class="tag">National Sensory Infrastructure</span>
-            <h3>Thailand Sensory Intelligence Platform</h3>
-            <p>
-              ชุดเอกสารและเว็บไซต์สำหรับแพลตฟอร์มระดับชาติด้าน scent archive,
-              institutional scent framework, AI agents, dashboard, governance และ international expansion
-            </p>
-            <a class="button compact" href="thailand-sensory-intelligence-platform/">เปิด Project Genesis</a>
-          </article>
-          <form id="portfolio-form" class="stacked-form panel-form">
-            <label>
-              ชื่อผลงาน
-              <input id="portfolio-title" type="text" placeholder="เช่น แผนธุรกิจชุมชนสร้างสรรค์" required />
-            </label>
-            <label>
-              รายละเอียด
-              <textarea id="portfolio-detail" placeholder="เล่าแนวคิด เป้าหมาย หรือสิ่งที่ได้เรียนรู้" required></textarea>
-            </label>
-            <button class="button primary" type="submit">บันทึกผลงาน</button>
-          </form>
-        </div>
-        <div>
-          <h3>ผลงานล่าสุด</h3>
-          <div id="portfolio-list" class="activity-list"></div>
-        </div>
-      </section>
-
-      <section class="section two-column upload-band" id="upload">
-        <div>
-          <p class="eyebrow">Shared Uploads</p>
-          <h2>อัปโหลดข้อมูลเพื่อเรียนรู้ร่วมกัน</h2>
+        <section class="info-section" id="about">
+          <p class="eyebrow">เกี่ยวกับหนังสือ</p>
+          <h2>ออกแบบให้อ่านเหมือนหนังสือ A5 ที่สงบและชัดเจน</h2>
           <p>
-            เพิ่มเอกสาร ลิงก์ หรือไฟล์ประกอบการเรียนรู้ แล้วระบบจะนำไปแสดงในพื้นที่แบ่งปัน
-            พร้อมเพิ่มคะแนนให้สมาชิกที่ร่วมแบ่งปัน
+            เว็บไซต์นี้ใช้โทนงาช้าง ขาว และทอง มีโหมดอ่านกลางคืน ปรับขนาดตัวอักษร ค้นหาบทสวด
+            บันทึกรายการโปรดในเครื่อง และคัดลอกบทสวดได้
           </p>
-        </div>
-        <form id="upload-form" class="stacked-form panel-form">
-          <label>
-            ชื่อข้อมูล
-            <input id="upload-title" type="text" placeholder="เช่น คู่มือออกแบบกิจกรรม" required />
-          </label>
-          <label>
-            หมวดหมู่
-            <select id="upload-category">
-              <option value="creative">สร้างสรรค์</option>
-              <option value="business">ธุรกิจ</option>
-              <option value="tech">เทคโนโลยี</option>
-            </select>
-          </label>
-          <label>
-            เลือกไฟล์
-            <input id="upload-file" type="file" />
-          </label>
-          <button class="button primary" type="submit">แบ่งปันข้อมูล</button>
-        </form>
-      </section>
-    </main>
+          <p>
+            เนื้อหาบางส่วนระบุ TODO เพื่อรอตรวจทานต้นฉบับและลิขสิทธิ์ก่อนเผยแพร่จริง
+            โดยหลีกเลี่ยงการคัดลอกคำแปลสมัยใหม่ที่อาจมีลิขสิทธิ์
+          </p>
+        </section>
 
-    <footer>
-      <span>CreativEX Knowledge Hub</span>
-      <span>พื้นที่เรียนรู้ร่วมกันสำหรับปี 2026</span>
-    </footer>
+        <section class="info-section" id="contact">
+          <p class="eyebrow">ติดต่อ / ร่วมจัดพิมพ์</p>
+          <h2>ร่วมดูแลต้นฉบับและจัดพิมพ์</h2>
+          <p>TODO: เพิ่มช่องทางติดต่อ ผู้ตรวจทานบทสวด และรายละเอียดการสนับสนุนการจัดพิมพ์</p>
+        </section>
+      </main>
+    </div>
 
-    <script src="app.js"></script>
+    <nav class="bottom-nav" aria-label="เมนูมือถือ">
+      <a href="#home">หน้าแรก</a>
+      <a href="#morning">เช้า</a>
+      <a href="#important">บทสวด</a>
+      <a href="#merit">เมตตา</a>
+      <a href="#meditation">สมาธิ</a>
+    </nav>
+
+    <script>
+      const prayers = [
+        {
+          id: "morning",
+          title: "ทำวัตรเช้า",
+          group: "ทำวัตร",
+          text: "ลำดับแนะนำ\\n\\n1. คำบูชาพระรัตนตรัย\\n2. นะโม 3 จบ\\n3. อิติปิโส\\n4. แผ่เมตตา\\n\\nTODO: เติมบททำวัตรเช้าฉบับบาลีที่ตรวจทานแล้ว"
+        },
+        {
+          id: "triple-gem",
+          title: "คำบูชาพระรัตนตรัย",
+          group: "บูชา",
+          text: "อะระหัง สัมมาสัมพุทโธ ภะคะวา\\nพุทธัง ภะคะวันตัง อะภิวาเทมิ\\n\\nสวากขาโต ภะคะวะตา ธัมโม\\nธัมมัง นะมัสสามิ\\n\\nสุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ\\nสังฆัง นะมามิ"
+        },
+        {
+          id: "namo",
+          title: "นะโม 3 จบ",
+          group: "บูชา",
+          text: "นะโม ตัสสะ ภะคะวะโต\\nอะระหะโต สัมมาสัมพุทธัสสะ\\n\\nนะโม ตัสสะ ภะคะวะโต\\nอะระหะโต สัมมาสัมพุทธัสสะ\\n\\nนะโม ตัสสะ ภะคะวะโต\\nอะระหะโต สัมมาสัมพุทธัสสะ"
+        },
+        {
+          id: "itipiso",
+          title: "อิติปิโส",
+          group: "บทสวดสำคัญ",
+          text: "อิติปิ โส ภะคะวา อะระหัง สัมมาสัมพุทโธ\\nวิชชาจะระณะสัมปันโน สุคะโต โลกะวิทู\\nอะนุตตะโร ปุริสะทัมมะสาระถิ\\nสัตถา เทวะมะนุสสานัง พุทโธ ภะคะวาติ\\n\\nสวากขาโต ภะคะวะตา ธัมโม\\nสันทิฏฐิโก อะกาลิโก เอหิปัสสิโก\\nโอปะนะยิโก ปัจจัตตัง เวทิตัพโพ วิญญูหิติ"
+        },
+        {
+          id: "bahum",
+          title: "พาหุงมหากา",
+          group: "บทสวดสำคัญ",
+          text: "พาหุง สะหัสสะมะภินิมมิตะสาวุธันตัง\\nครีเมขะลัง อุทิตะโฆระสะเสนะมารัง\\nทานาทิธัมมะวิธินา ชิตะวา มุนินโท\\nตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ\\n\\nTODO: ตรวจทานและเติมบทบาลีฉบับเต็มก่อนเผยแพร่"
+        },
+        {
+          id: "evening",
+          title: "ทำวัตรเย็น",
+          group: "ทำวัตร",
+          text: "ลำดับแนะนำ\\n\\n1. คำบูชาพระรัตนตรัย\\n2. นะโม 3 จบ\\n3. อิติปิโส\\n4. บทแผ่เมตตา\\n5. บทอุทิศส่วนกุศล\\n\\nTODO: เติมบททำวัตรเย็นฉบับบาลีที่ตรวจทานแล้ว"
+        },
+        {
+          id: "metta",
+          title: "บทแผ่เมตตา",
+          group: "เมตตา",
+          text: "สัพเพ สัตตา อะเวรา โหนตุ\\nอัพยาปัชฌา โหนตุ\\nอะนีฆา โหนตุ\\nสุขี อัตตานัง ปะริหะรันตุ"
+        },
+        {
+          id: "dedication",
+          title: "บทอุทิศส่วนกุศล",
+          group: "เมตตา",
+          text: "อิทัง เม ญาตีนัง โหตุ\\nสุขิตา โหนตุ ญาตะโย\\n\\nTODO: เติมสำนวนที่ผ่านการตรวจทานลิขสิทธิ์แล้ว"
+        },
+        {
+          id: "meditation",
+          title: "อานาปานสติ",
+          group: "สมาธิ",
+          text: "TODO: เติมคำแนะนำภาวนาแบบเรียบง่ายที่เขียนใหม่ทั้งหมด\\n\\nหัวข้อร่าง:\\n- รู้ลมหายใจเข้า\\n- รู้ลมหายใจออก\\n- กลับมารู้กายและใจด้วยความอ่อนโยน"
+        },
+        {
+          id: "dharma",
+          title: "หลักธรรม",
+          group: "หลักธรรม",
+          text: "พรหมวิหาร 4: เมตตา กรุณา มุทิตา อุเบกขา\\n\\nอริยสัจ 4: ทุกข์ สมุทัย นิโรธ มรรค\\n\\nมรรคมีองค์ 8: สัมมาทิฏฐิ สัมมาสังกัปปะ สัมมาวาจา สัมมากัมมันตะ สัมมาอาชีวะ สัมมาวายามะ สัมมาสติ สัมมาสมาธิ"
+        }
+      ];
+
+      const reader = document.querySelector("#reader");
+      const toc = document.querySelector("#toc-list");
+      const search = document.querySelector("#search-input");
+      const storageKey = "thai-prayer-book-bookmarks";
+      let fontSize = Number(localStorage.getItem("thai-prayer-font-size") || 24);
+
+      function bookmarks() {
+        try {
+          return JSON.parse(localStorage.getItem(storageKey) || "[]");
+        } catch {
+          return [];
+        }
+      }
+
+      function render() {
+        const query = search.value.trim().toLowerCase();
+        const saved = bookmarks();
+        const list = prayers.filter((item) => (item.title + item.group + item.text).toLowerCase().includes(query));
+        toc.innerHTML = prayers.map((item) => `<a href="#${item.id}">${item.title}</a>`).join("");
+        reader.innerHTML = list
+          .map(
+            (item) => `
+              <article class="prayer" id="${item.id}">
+                <div class="prayer-head">
+                  <div>
+                    <span>${item.group}</span>
+                    <h2>${item.title}</h2>
+                  </div>
+                  <div class="prayer-actions">
+                    <button class="icon-button bookmark ${saved.includes(item.id) ? "active" : ""}" data-bookmark="${item.id}" type="button" aria-label="บันทึกบทสวด">★</button>
+                    <button class="icon-button" data-copy="${item.id}" type="button" aria-label="คัดลอกบทสวด">⧉</button>
+                  </div>
+                </div>
+                <pre style="font-size:${fontSize}px">${item.text}</pre>
+              </article>
+            `
+          )
+          .join("");
+      }
+
+      document.addEventListener("click", async (event) => {
+        const bookmark = event.target.closest("[data-bookmark]");
+        const copy = event.target.closest("[data-copy]");
+        if (bookmark) {
+          const id = bookmark.dataset.bookmark;
+          const saved = bookmarks();
+          const next = saved.includes(id) ? saved.filter((item) => item !== id) : [...saved, id];
+          localStorage.setItem(storageKey, JSON.stringify(next));
+          render();
+        }
+        if (copy) {
+          const item = prayers.find((prayer) => prayer.id === copy.dataset.copy);
+          await navigator.clipboard.writeText(`${item.title}\\n\\n${item.text}`);
+          copy.textContent = "✓";
+          setTimeout(() => (copy.textContent = "⧉"), 900);
+        }
+      });
+
+      search.addEventListener("input", render);
+      document.querySelector("#font-down").addEventListener("click", () => {
+        fontSize = Math.max(18, fontSize - 2);
+        localStorage.setItem("thai-prayer-font-size", fontSize);
+        render();
+      });
+      document.querySelector("#font-reset").addEventListener("click", () => {
+        fontSize = 24;
+        localStorage.setItem("thai-prayer-font-size", fontSize);
+        render();
+      });
+      document.querySelector("#font-up").addEventListener("click", () => {
+        fontSize = Math.min(34, fontSize + 2);
+        localStorage.setItem("thai-prayer-font-size", fontSize);
+        render();
+      });
+      document.querySelector("#theme-toggle").addEventListener("click", () => {
+        document.documentElement.classList.toggle("dark");
+        localStorage.setItem("thai-prayer-theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
+      });
+      if (localStorage.getItem("thai-prayer-theme") === "dark") document.documentElement.classList.add("dark");
+      render();
+    </script>
   </body>
 </html>
