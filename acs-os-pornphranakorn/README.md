@@ -1,0 +1,21 @@
+# พรพระนคร — ACS OS: ชุดแบบ Engineering v2.1
+
+> **โฟลเดอร์นี้เป็นเอกสารออกแบบเท่านั้น** repository นี้ (`creativex2026-chula-cea-arithach`) **ไม่ใช่ repository เป้าหมาย** ของ ACS OS และไม่ได้ใช้เป็นหลักฐาน existing stack เก็บไว้ที่นี่ชั่วคราวจนกว่าเจ้าของจะระบุ repo เป้าหมาย (LIL-34)
+
+สถานะ: `DESIGN_DRAFT` · `IMPLEMENTATION_BLOCKED` · `NOT_DEPLOYED` · Verdict **REVISE**
+
+| ไฟล์ | เนื้อหา |
+|---|---|
+| [`ACS_OS_Engineering_v2.1.md`](ACS_OS_Engineering_v2.1.md) | เอกสารหลักฉบับรวม: แหล่งอ้างอิง, changelog เทียบ v2, discrepancy register, architecture, data design, transactions, outbox, security, privacy, prototype contract, ADR, delivery/acceptance, verdict |
+| [`schema/v2.1-proposed-schema.sql`](schema/v2.1-proposed-schema.sql) | DDL ที่เสนอ (Option A) — ไม่ใช่ migration ของระบบจริง |
+| [`schema/option-b-terms-decision.sql`](schema/option-b-terms-decision.sql) | ตาราง approval แบบ CONDITIONAL ใช้เมื่อเจ้าของยืนยันขั้นอนุมัติ |
+| [`schema/smoke-test.sql`](schema/smoke-test.sql), [`schema/run-smoke-test.sh`](schema/run-smoke-test.sh) | smoke test ของ DDL บน PostgreSQL ชั่วคราว รวม concurrency 2 sessions |
+| [`verification/smoke-test-raw-output.md`](verification/smoke-test-raw-output.md) | ผลรันจริง (PostgreSQL 16.15, 2026-10-10) |
+
+รัน smoke test ซ้ำ (ต้องเป็นผู้ใช้ที่ไม่ใช่ root และมี PostgreSQL 16 binaries):
+
+```bash
+PGBIN=/usr/lib/postgresql/16/bin ./schema/run-smoke-test.sh /tmp/acs-smoke
+```
+
+ผล smoke test พิสูจน์พฤติกรรม constraint/trigger ของแบบที่เสนอเท่านั้น ไม่ใช่ implementation, application test, reviewer approval หรือ deployment
