@@ -1,6 +1,6 @@
 -- ACS OS Engineering v2.1 — PROPOSED schema (design artifact, not a migration)
 -- สถานะ: ข้อเสนอเพื่อตรวจแบบ ยังไม่ได้รันกับฐานข้อมูลของระบบเป้าหมาย
--- ทดสอบเฉพาะบน PostgreSQL 16 ชั่วคราว ดู verification/SMOKE_TEST_RESULTS.md
+-- ทดสอบเฉพาะบน PostgreSQL 16 ชั่วคราว ดู verification/smoke-test-raw-output.md
 -- ค่าที่รอเจ้าของ (ห้ามเดา): สกุลเงิน/scale, ค่าธรรมเนียม, นิยาม binding, retention, TTL ที่ผูกนโยบาย
 -- Option A (baseline): immutable terms version + lifecycle อยู่บน deal row
 -- Option B (มีขั้นอนุมัติแยก): ดู option-b-terms-decision.sql — สร้างเมื่อเจ้าของยืนยันเท่านั้น

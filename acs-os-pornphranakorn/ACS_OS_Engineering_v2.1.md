@@ -1030,7 +1030,7 @@ S-10 ผูกข้อตกลง (Bind)
 | ข้อมูล | fixtures ติดป้าย `TEST`/`MOCK` ห้ามใช้ข้อมูลจริง | PostgreSQL ตาม §3 |
 | Auth | mock role switcher (ระบุชัดว่า mock) | auth provider + MFA จริง |
 | Stale/duplicate/error | จำลองด้วย mock API ที่คืน 409/429/500 ตาม contract ใน §4 | พฤติกรรมจริงจาก DB |
-| ปลายทางภายนอก | ไม่มี | adapter → mock → sandbox → provider จริง (§10.6) |
+| ปลายทางภายนอก | ไม่มี | adapter → mock → sandbox → provider จริง (§10.4) |
 
 ### 8.7 Public pages
 
