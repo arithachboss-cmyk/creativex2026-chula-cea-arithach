@@ -1,13 +1,14 @@
-# ACS OS — Engineering v2.1 (พรพระนคร)
+# ACS OS — Engineering v2.2 (พรพระนคร)
 
 | รายการ | ค่า |
 |---|---|
-| เอกสาร | ACS OS Engineering v2.1 ฉบับรวม (standalone) |
+| เอกสาร | ACS OS Engineering v2.2 ฉบับรวม (standalone) |
 | โครงการ | พรพระนคร — ACS OS (Linear `P-LIL-4`) |
-| วันที่ | 2026-10-10 |
+| วันที่ | 2026-10-13 (v2.2) · 2026-10-10 (v2.1) |
 | ผู้จัดทำ | Claude (Solution Architect / Strategic Reviewer) |
 | สถานะ | `DESIGN_DRAFT` · `IMPLEMENTATION_BLOCKED` · `NOT_DEPLOYED` · `REVIEWER_APPROVAL_NONE` |
 | ฐานเดิม | ACS OS Engineering v2 (snapshot ในหน้า Notion "ACS OS — สกิลออกแบบวิศวกรรมฯ" แก้ไขล่าสุด 2026-10-09T03:31Z) |
+| ฉบับก่อนหน้า | v2.1 (commit `1fadfd3`) — v2.2 แก้เฉพาะจำนวนหน้าจอใน §10.7 ดู §1.2 (C-17, C-18) |
 | Verdict ของเอกสารนี้ | **REVISE** — ดู §11 |
 
 > เอกสารนี้เป็น **แบบเสนอ** ไม่ใช่หลักฐานว่ามีระบบ ตาราง หรือ deployment แล้ว
@@ -19,7 +20,7 @@
 ## สารบัญ
 
 0. [แหล่งอ้างอิง ข้อจำกัด และวิธีอ่าน](#0-แหล่งอ้างอิง-ข้อจำกัด-และวิธีอ่าน)
-1. [Engineering v2.1: ขอบเขต, changelog, discrepancy register, ข้อค้าง](#1-engineering-v21-ขอบเขต-changelog-discrepancy-register-ข้อค้าง)
+1. [Engineering v2.2: ขอบเขต, changelog, discrepancy register, ข้อค้าง](#1-engineering-v22-ขอบเขต-changelog-discrepancy-register-ข้อค้าง)
 2. [Architecture](#2-architecture)
 3. [Data design](#3-data-design)
 4. [Transactions และ concurrency](#4-transactions-และ-concurrency)
@@ -70,13 +71,13 @@
 
 ---
 
-## 1. Engineering v2.1: ขอบเขต, changelog, discrepancy register, ข้อค้าง
+## 1. Engineering v2.2: ขอบเขต, changelog, discrepancy register, ข้อค้าง
 
 ### 1.1 เป้าหมายและขอบเขต
 
 ระบบรับ Lead ติดตาม Deal และบันทึกข้อตกลงแบบมีเวอร์ชัน พร้อม private hub, หน้า public และ integration ที่ทนต่อความล้มเหลว เน้นความถูกต้อง ต้นทุนรวมต่ำ และดูแลได้ด้วยทีมเล็ก [E: SRC-03, SRC-04]
 
-อยู่ในขอบเขต v2.1
+อยู่ในขอบเขต (v2.2 ไม่เปลี่ยนขอบเขตจาก v2.1)
 - รับ Lead จากหน้า public (ไม่ต้อง login) พร้อม acquisition และ consent
 - Private hub: รายการ/รายละเอียด Lead, Deal, terms versions, binding (และ approval หากเจ้าของยืนยัน)
 - Audit, outbox, CRM handoff, privacy requests
@@ -90,7 +91,9 @@
 - external effects เป็น at-least-once; ไม่อ้าง exactly-once
 - เงินใช้ `numeric`/decimal; ห้าม float
 
-### 1.2 Changelog เทียบ v2
+### 1.2 Changelog
+
+**v2.1 เทียบ v2**
 
 | # | หัวข้อ | v2 | v2.1 | เหตุผล / แหล่ง |
 |---|---|---|---|---|
@@ -110,6 +113,13 @@
 | C-14 | Prototype | ไม่มี | prototype contract แยกจากต้นแบบที่สร้างจริง (ยังไม่ได้สร้าง) | คำสั่งงานนี้ ข้อ 8 |
 | C-15 | Acceptance | รายการ tests | แยก design / prototype / implementation acceptance + traceability | คำสั่งงานนี้ ข้อ 10 |
 | C-16 | เวลา | 11–15 วันทำงาน | คง 11–15 เป็น reference; เพิ่ม scope delta ของ v2.1 และแยกต่อยอด vs สร้างใหม่ (§10.7) | SRC-08 estimation rules |
+
+**v2.2 เทียบ v2.1** (2026-10-13) — ส่วนอื่นทั้งหมด รวม DDL ใน `schema/` และผล smoke test ไม่เปลี่ยน
+
+| # | หัวข้อ | v2.1 | v2.2 | เหตุผล / แหล่ง |
+|---|---|---|---|---|
+| C-17 | จำนวนหน้าจอใน §10.7 | "Private hub UI 13 หน้าจอ (PR-12)" | "Private hub UI 9 หน้าจอ S-05…S-13 (PR-12) + S-03/S-04/S-14 ถ้า auth provider/framework ไม่มีให้"; วันทำงาน 3–5 และผลรวมไม่เปลี่ยน | ตรวจซ้ำพบว่าไม่ตรงกับ §8.1/§8.3 (14 หน้าจอ: public 2, auth 2, private hub 9, error 1) — L-04 |
+| C-18 | เวอร์ชันถัดไปใน §11.4 ข้อ 6 | ปรับ v2.1 → v2.2 หลัง PR-00 | ปรับ v2.2 → v2.3 หลัง PR-00 | เลข v2.2 ใช้กับการแก้ครั้งนี้แล้ว |
 
 ### 1.3 Discrepancy register
 
@@ -1214,7 +1224,7 @@ Scope delta ของ v2.1 ที่ไม่อยู่ใน reference (ไ�
 | Consent withdrawal + privacy requests + erasure + export (PR-11) | 2–3 | ใหม่ใน v2.1 |
 | CRM adapter sandbox + reconciliation (PR-10) | 1–2 | v2 ระบุให้นับ integration แยก |
 | Dispatcher runtime ตาม hosting (PR-09) ส่วนที่เกิน schema | 1–2 | v2 รวม schema แต่ไม่รวม runtime/alerts |
-| Private hub UI 13 หน้าจอ (PR-12) | 3–5 | ถ้า repo ยังไม่มี UI ส่วนนี้ |
+| Private hub UI 9 หน้าจอ S-05…S-13 (PR-12) + S-03/S-04/S-14 ถ้า auth provider/framework ไม่มีให้ | 3–5 | ถ้า repo ยังไม่มี UI ส่วนนี้ |
 | **รวม delta** | **7–12** | |
 
 | สถานการณ์ | ประมาณการ | สมมติฐาน |
@@ -1253,6 +1263,7 @@ Scope delta ของ v2.1 ที่ไม่อยู่ใน reference (ไ�
 | L-01 | Low | RLS ไม่บังคับ | authz พึ่งชั้นแอปชั้นเดียว | พิจารณาหลัง PR-06 |
 | L-02 | Low | Audit ไม่มี hash chain | ไม่ tamper-evident ต่อ superuser | เพิ่มถ้าเจ้าของต้องการ |
 | L-03 | Low | Guard หลัง bound ปฏิเสธการยกเลิกทุกกรณี | อาจเข้มเกินนโยบายจริง | ปรับตาม OD-04 |
+| L-04 | ~~Low~~ แก้แล้วใน v2.2 | §10.7 เขียน "Private hub UI 13 หน้าจอ" ไม่ตรงกับ §8.3 | ขอบเขต PR-12 อ่านผิด | แก้แล้ว (C-17) |
 
 ### 11.3 Owner decisions พร้อมผลกระทบ
 
@@ -1284,7 +1295,7 @@ Scope delta ของ v2.1 ที่ไม่อยู่ใน reference (ไ�
 | 3 | Review เอกสารนี้แบบอิสระและจัดลำดับ OD | ChatGPT (Project Director / Orchestrator) |
 | 4 | สร้าง clickable prototype ตาม §8 ด้วย mock data | Lovable (UI Builder) |
 | 5 | QA prototype ตาม PA-01…08 | Manus (QA / Operator) |
-| 6 | หลังได้ repo: PR-00 discovery และปรับ v2.1 → v2.2 | Codex (Lead Engineer) + Claude review |
+| 6 | หลังได้ repo: PR-00 discovery และปรับ v2.2 → v2.3 | Codex (Lead Engineer) + Claude review |
 | 7 | อัปเดต LIL-34 และหน้า Notion เปิดโครงการด้วยลิงก์เอกสารนี้ | Orchestrator (เมื่อได้รับคำสั่ง) |
 
 ### 11.5 สิ่งที่ยังไม่ได้ตรวจหรือทดสอบ
