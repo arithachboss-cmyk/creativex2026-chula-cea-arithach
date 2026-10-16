@@ -1,0 +1,1280 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="AMI Agent Office: สำนักงาน AI เอเจนต์แบบเดินได้ของกลุ่ม AMI ตามแผน Shopee Mall และแผนสู่ IPO">
+<title>AMI Agent Office</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Prompt:wght@500;600;700&display=swap">
+<style>
+/* Layout: a full-bleed walkable 3D office; the HUD floats at the safe-area edges; an agent sheet docks right on desktop and rises from the bottom on phones. Single dark look by choice (Brady navy + ACS red). */
+:root {
+  --ink: #08122b;
+  --panel: #0f1c40;
+  --panel-2: #15275a;
+  --line: #263c78;
+  --text: #eaf0ff;
+  --muted: #a3b7e2;
+  --red: #e2283b;
+  --red-hover: #f03b4e;
+  --me: #1d3c8f;
+  --ok: #3ccf91;
+  --warn: #f2b33d;
+  --crit: #ff5d6c;
+  --display: "Prompt", "Noto Sans Thai", "Loma", system-ui, sans-serif;
+  --body: "IBM Plex Sans Thai", "Noto Sans Thai", "Loma", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "IBM Plex Sans Thai", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; overflow: hidden; }
+body { background: var(--ink); color: var(--text); font: 400 14px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+button, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid #9fc0ff; outline-offset: 2px; }
+
+#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+
+#hud {
+  position: fixed; inset: 0; pointer-events: none; z-index: 10;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
+  padding-block: calc(env(safe-area-inset-top, 0px) + 14px) calc(env(safe-area-inset-bottom, 0px) + 14px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.glass { background: rgba(8, 18, 43, .78); border: 1px solid var(--line); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.brand { pointer-events: auto; display: flex; align-items: center; gap: 12px; border-radius: 14px; padding: 10px 14px; min-width: 0; }
+.mark { width: 30px; height: 30px; flex: none; border-radius: 8px; background: #0a1a46; position: relative; overflow: hidden; border: 1px solid #2c4590; }
+.mark::before { content: ""; position: absolute; left: 6px; right: 6px; top: 9px; height: 3px; background: var(--red); border-radius: 2px; }
+.mark::after { content: ""; position: absolute; left: -4px; right: -4px; bottom: 6px; height: 5px; background: var(--red); transform: rotate(-9deg); }
+.brand h1 { margin: 0; font: 600 18px/1.2 var(--display); letter-spacing: .01em; text-wrap: balance; }
+.brand p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+.status { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.chip { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 7px 12px; font-size: 13px; line-height: 1.2; white-space: nowrap; }
+.chip strong { font: 600 13px var(--mono); color: #fff; }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex: none; }
+.chip.ai .dot { background: var(--warn); }
+.chip.ai.live .dot { background: var(--ok); box-shadow: 0 0 0 3px rgba(60, 207, 145, .22); }
+.chip.ai.denied .dot { background: var(--crit); }
+button.chip { border: 1px solid var(--line); }
+.chip .short { display: none; }
+button.chip:hover { background: var(--panel-2); }
+.disclaimer { align-self: flex-start; pointer-events: none; margin-top: -4px; font-size: 12px; color: #ffd0d5; background: rgba(226, 40, 59, .16); border: 1px solid rgba(226, 40, 59, .45); border-radius: 8px; padding: 4px 10px; }
+
+.bottom { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.hint { margin: 0; font-size: 12.5px; color: var(--muted); text-align: center; text-wrap: balance; text-shadow: 0 1px 2px #000; }
+#talkBtn {
+  pointer-events: auto; display: inline-flex; align-items: center; gap: 10px;
+  padding: 11px 20px 11px 14px; border-radius: 999px; border: 2px solid rgba(255, 255, 255, .9);
+  background: rgba(6, 12, 30, .9); font: 600 16px var(--display); color: #fff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .45);
+}
+#talkBtn:hover { background: #12204a; }
+#talkBtn .bubble { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--c, var(--red)); }
+#talkBtn kbd { font: 600 11px var(--mono); padding: 2px 6px; border-radius: 5px; border: 1px solid rgba(255, 255, 255, .35); color: var(--muted); }
+.dock { pointer-events: auto; display: flex; gap: 6px; max-width: 100%; overflow-x: auto; padding: 6px; border-radius: 16px; scrollbar-width: none; }
+.dock::-webkit-scrollbar { display: none; }
+.dock button { flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 11px; border: 1px solid transparent; background: transparent; font-size: 14px; font-weight: 500; white-space: nowrap; }
+.dock button:hover, .dock button.near { background: var(--panel-2); border-color: var(--line); }
+.swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--c); flex: none; }
+
+#joy { position: fixed; z-index: 11; left: calc(max(16px, env(safe-area-inset-left, 0px)) + 6px); bottom: calc(env(safe-area-inset-bottom, 0px) + 118px); width: 112px; height: 112px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .28); background: rgba(8, 18, 43, .38); touch-action: none; }
+#joy .knob { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: rgba(255, 255, 255, .2); border: 2px solid rgba(255, 255, 255, .6); }
+
+#sheet {
+  position: fixed; z-index: 20; display: flex; flex-direction: column; overflow: hidden;
+  top: calc(env(safe-area-inset-top, 0px) + 12px); bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  right: max(12px, env(safe-area-inset-right, 0px)); width: min(440px, calc(100vw - 24px));
+  background: var(--panel); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+}
+.sheet-head { display: flex; align-items: center; gap: 12px; padding: 14px 14px 12px 18px; border-bottom: 1px solid var(--line); }
+.sheet-head .swatch { width: 14px; height: 14px; border-radius: 4px; }
+.sheet-head > div { flex: 1; min-width: 0; }
+.sheet-head .tag { margin: 0; font: 600 11px var(--mono); letter-spacing: .14em; color: var(--c); }
+.sheet-head h2 { margin: 1px 0 0; font: 600 20px/1.25 var(--display); }
+#closeSheet { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: transparent; font-size: 20px; line-height: 1; flex: none; }
+#closeSheet:hover { background: var(--panel-2); }
+.sheet-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+.role { margin: 0; font-size: 15px; line-height: 1.6; color: #dbe4fb; }
+.label { margin: 4px 0 -4px; font: 600 11px var(--mono); letter-spacing: .14em; color: var(--muted); }
+.facts { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fact { background: var(--panel-2); border-radius: 10px; padding: 9px 12px; min-width: 0; }
+.fact dt { font-size: 12px; color: var(--muted); }
+.fact dd { margin: 2px 0 0; font: 600 15px/1.35 var(--body); font-variant-numeric: tabular-nums; }
+.fact.sev-high dd { color: var(--crit); }
+.fact.sev-mid dd { color: var(--warn); }
+.fact.sev-low dd { color: var(--ok); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.act { padding: 9px 13px; border-radius: 10px; border: 1px solid var(--c); background: transparent; font-size: 14px; font-weight: 500; text-align: left; }
+.act:hover:not(:disabled) { background: var(--panel-2); }
+.act:disabled, #sendBtn:disabled { opacity: .5; cursor: default; }
+.log { display: flex; flex-direction: column; gap: 10px; }
+.msg { padding: 11px 14px; border-radius: 14px; line-height: 1.62; font-size: 14.5px; min-width: 0; overflow-wrap: anywhere; }
+.msg.agent { background: var(--panel-2); border: 1px solid var(--line); }
+.msg.me { align-self: flex-end; max-width: 86%; background: var(--me); }
+.msg .who { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 4px; font: 600 12.5px var(--display); color: var(--c); }
+.msg .src { font: 500 10.5px var(--mono); letter-spacing: .08em; color: var(--muted); }
+.msg h4 { margin: 10px 0 4px; font: 600 15px var(--display); }
+.msg p { margin: 5px 0; }
+.msg ul, .msg ol { margin: 5px 0; padding-left: 1.3em; }
+.msg li { margin: 3px 0; }
+.msg strong { color: #fff; }
+.msg code { font: 500 13px var(--mono); background: rgba(255, 255, 255, .07); padding: 1px 5px; border-radius: 5px; }
+.msg blockquote { margin: 7px 0; padding: 8px 12px; border-left: 3px solid var(--c); background: rgba(255, 255, 255, .04); border-radius: 0 8px 8px 0; }
+.msg .note { color: var(--warn); font-size: 13px; }
+.thinking { color: var(--muted); }
+.thinking::after { content: "…"; display: inline-block; animation: blink 1.2s steps(3) infinite; }
+@keyframes blink { 50% { opacity: .2; } }
+.composer { border-top: 1px solid var(--line); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; background: var(--panel); }
+#msg { width: 100%; box-sizing: border-box; resize: none; min-height: 46px; max-height: 140px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--ink); font-size: 15px; line-height: 1.45; }
+#msg::placeholder { color: #7f93c4; }
+.composer .row { display: flex; align-items: center; gap: 8px; }
+#liveNote { flex: 1; min-width: 0; font-size: 12px; color: var(--muted); line-height: 1.35; }
+#sendBtn, #stopBtn, .primary { border-radius: 10px; padding: 9px 16px; font-weight: 600; font-size: 14px; flex: none; }
+#sendBtn, .primary { border: 0; background: var(--red); color: #fff; }
+#sendBtn:hover:not(:disabled), .primary:hover { background: var(--red-hover); }
+#stopBtn, .secondary { border: 1px solid var(--line); background: transparent; border-radius: 10px; padding: 9px 14px; font-weight: 500; }
+.pill { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 999px; }
+.pill.warn { color: #ffd0d5; background: rgba(226, 40, 59, .16); border: 1px solid rgba(226, 40, 59, .45); }
+.phase { margin: 6px 0 0; font: 600 15px/1.4 var(--display); }
+.phase small { display: block; font: 400 12.5px var(--body); color: var(--muted); }
+.tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.tl li { background: var(--panel-2); border-radius: 12px; padding: 10px 12px; display: grid; gap: 4px; }
+.tl .when { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font: 600 14px var(--display); color: #ff8d98; }
+.tl .state { font: 500 11.5px var(--mono); color: var(--muted); white-space: nowrap; }
+.tl li.next { outline: 1px solid var(--red); }
+.tl li.next .state { color: #fff; }
+.tl ul { margin: 0; padding-left: 1.2em; color: #dbe4fb; }
+.foot { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font: 500 12px var(--body); color: var(--muted); background: var(--panel-2); }
+tr:last-child td { border-bottom: 0; }
+tr.next td { color: #fff; background: rgba(226, 40, 59, .12); }
+td.num { font-family: var(--mono); }
+
+#listView { position: fixed; inset: 0; z-index: 5; overflow-y: auto; background: var(--ink);
+  padding-block: calc(env(safe-area-inset-top, 0px) + 128px) calc(env(safe-area-inset-bottom, 0px) + 32px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.cards { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.card { text-align: left; display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); min-width: 0; }
+.card:hover { background: var(--panel-2); }
+.card .tag { font: 600 11px var(--mono); letter-spacing: .14em; color: var(--c); display: flex; gap: 8px; align-items: center; }
+.card h3 { margin: 0; font: 600 18px var(--display); }
+.card p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+
+@media (max-width: 720px) {
+  .brand h1 { font-size: 16px; }
+  .brand p { display: none; }
+  .chip { font-size: 12px; padding: 6px 10px; }
+  .chip .long { display: none; }
+  .chip .short { display: inline; }
+  .disclaimer { font-size: 11px; }
+  #sheet { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 78%; border-radius: 18px 18px 0 0; border-bottom: 0; }
+  .sheet-head, .sheet-body, .composer { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .composer { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
+  body.sheet-open .bottom, body.sheet-open #joy { visibility: hidden; }
+  #listView { padding-top: calc(env(safe-area-inset-top, 0px) + 150px); }
+}
+@media (min-width: 721px) {
+  body.sheet-open #hud { padding-right: calc(min(440px, 100vw - 24px) + 28px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .thinking::after { animation: none; }
+}
+</style>
+</head>
+<body>
+<canvas id="scene" tabindex="0" aria-label="สำนักงานเอเจนต์ AMI แบบ 3 มิติ ใช้ปุ่มด้านล่างเพื่อไปหาเอเจนต์แต่ละตัว"></canvas>
+
+<div id="hud">
+  <div class="top">
+    <div class="brand glass">
+      <div class="mark" aria-hidden="true"></div>
+      <div>
+        <h1>AMI Agent Office</h1>
+        <p>AMI Asiancodingsystems GROUP · เอเจนต์ 5 ตัวทำงานตามแผนสู่ IPO</p>
+      </div>
+    </div>
+    <div class="status">
+      <span class="chip glass" id="nextChip"><span class="dot"></span><span id="nextText">กำลังคำนวณ…</span></span>
+      <span class="chip glass ai" id="aiChip"><span class="dot"></span><span class="long" id="aiText">กำลังเชื่อม AI…</span><span class="short" id="aiShort">กำลังเชื่อม</span></span>
+      <button class="chip glass" id="viewToggle" type="button"><span class="long">มุมมองรายการ</span><span class="short">รายการ</span></button>
+    </div>
+  </div>
+  <div class="disclaimer">ตัวเลขทั้งหมดเป็น "เป้าหมาย" ไม่ใช่ผลจริง</div>
+  <div style="flex:1"></div>
+  <div class="bottom">
+    <button id="talkBtn" type="button" hidden><span class="bubble" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg></span><span id="talkText">คุย</span><kbd id="talkKey">E</kbd></button>
+    <p class="hint" id="hint"></p>
+    <nav class="dock glass" id="dock" aria-label="เดินไปหาเอเจนต์"></nav>
+  </div>
+</div>
+
+<div id="joy" hidden aria-hidden="true"><div class="knob"></div></div>
+
+<section id="listView" hidden aria-label="รายการเอเจนต์">
+  <div class="cards" id="cards"></div>
+</section>
+
+<aside id="sheet" hidden aria-labelledby="sheetTitle">
+  <div class="sheet-head">
+    <span class="swatch" id="sheetSwatch"></span>
+    <div><p class="tag" id="sheetTag"></p><h2 id="sheetTitle"></h2></div>
+    <button id="closeSheet" type="button" aria-label="ปิด">×</button>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+  <form class="composer" id="composer" hidden>
+    <textarea id="msg" rows="2" placeholder="พิมพ์ถามเอเจนต์ หรือวางข้อมูลที่ต้องการให้ช่วย"></textarea>
+    <div class="row">
+      <span id="liveNote"></span>
+      <button type="button" id="stopBtn" hidden>หยุด</button>
+      <button type="submit" id="sendBtn">ส่ง</button>
+    </div>
+  </form>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+"use strict";
+
+/* ---------- Plan data (from "แผนงาน AMI สู่ IPO", จัดทำ ต.ค. 2569) ---------- */
+const ymd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const TODAY = (() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); })();
+const daysTo = d => Math.round((d - TODAY) / 86400000);
+const fmtLong = d => new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" }).format(d);
+const fmtShort = d => new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short" }).format(d);
+const baht = n => "฿" + n.toLocaleString("th-TH");
+
+const MILESTONES = [
+  { d: ymd("2026-10-22"), title: "ส่งเอกสาร Shopee Mall", short: "ส่งเอกสาร Shopee Mall",
+    items: ["คุณ Chutima ส่งเอกสารบริษัทสำหรับ Shopee Mall", "คุณอริย์ธัชให้สิทธิ์ Seller Center"] },
+  { d: ymd("2026-10-31"), title: "ยืนยันสต็อก 30 รายการแรก", short: "ยืนยันสต็อก 30 รายการ",
+    items: ["Procurement ACS ยืนยันสต็อก 30 รายการแรก"] },
+  { d: ymd("2026-11-14"), title: "ลงสินค้า 30 รายการ และยื่น Shopee Mall", short: "30 SKU · 10 ออเดอร์",
+    items: ["ลงสินค้า Brady 30 รายการ", "ยื่น Shopee Mall", "เป้าหมาย 10 ออเดอร์ / 50,000 บาทต่อเดือน"], sku: 30, orders: 10, sales: 50000 },
+  { d: ymd("2026-12-14"), title: "Shopee Mall อนุมัติ · 80 รายการ", short: "Mall อนุมัติ · 40 ออเดอร์",
+    items: ["Shopee Mall อนุมัติ", "80 รายการ", "เป้าหมาย 40 ออเดอร์ / 200,000 บาท", "ตรวจโครงสร้างผู้ถือหุ้นกลุ่มเสร็จ"], sku: 80, orders: 40, sales: 200000 },
+  { d: ymd("2027-01-13"), title: "150 รายการ · เริ่มเปลี่ยนผู้สอบบัญชี", short: "150 SKU · 90 ออเดอร์",
+    items: ["150 รายการ", "เป้าหมาย 90 ออเดอร์ / 450,000 บาทต่อเดือน", "เริ่มเปลี่ยนผู้สอบบัญชีที่ ก.ล.ต. รับรอง"], sku: 150, orders: 90, sales: 450000 },
+];
+const LATER = [
+  { span: "2570 – 2572", phase: "ระยะที่ 2 · ปรับโครงสร้าง", short: "≥ 5.4 ล้าน/ปี · โฮลดิ้ง",
+    items: ["ACS ยอดขายออนไลน์ เป้าหมาย เกิน 5.4 ล้านบาท/ปี", "โฮลดิ้งถือหุ้นบริษัทลูกครบ: ACS, โฆษณา, ซอฟต์แวร์, วิศวกรรม, Middle Property, สำนักงานกฎหมาย (รอความเห็นกฎหมาย)", "แต่งตั้งกรรมการอิสระ"] },
+  { span: "2576 – 2579", phase: "ระยะที่ 3 · เตรียม IPO", short: "งบ 3 ปี · ยื่น mai",
+    items: ["งบการเงินตรวจสอบต่อเนื่อง 3 ปี", "แปรสภาพเป็นบริษัทมหาชน", "ยื่นจดทะเบียน mai", "เกณฑ์ mai: กำไรสุทธิรวม 2–3 ปี ≥ 40 ล้านบาท, ปีล่าสุด ≥ 25 ล้านบาท"] },
+];
+const NEXT = MILESTONES.find(m => daysTo(m.d) >= 0) || null;
+const NEXT_SKU = MILESTONES.find(m => m.sku && daysTo(m.d) >= 0) || MILESTONES[MILESTONES.length - 1];
+const OWNER = "อริย์ธัช ชาติอาริยะพงศ์";
+const daysText = n => n === 0 ? "วันนี้" : "อีก " + n + " วัน";
+
+function planContext() {
+  const L = ["ระยะที่ 1 · เปิด Shopee Mall และขยายยอดขายออนไลน์ (ต.ค. 2569 – ม.ค. 2570):"];
+  for (const m of MILESTONES) L.push("- " + fmtLong(m.d) + ": " + m.items.join("; "));
+  for (const p of LATER) { L.push(p.phase + " (" + p.span + "):"); p.items.forEach(i => L.push("- " + i)); }
+  L.push("หมายเหตุจากแผน: ช่วง 2570–2579 ไม่ได้วาดตามสเกลเวลาจริง เกณฑ์ mai อ้างอิงเว็บไซต์ SET ควรตรวจสอบเกณฑ์ล่าสุดก่อนยื่น");
+  L.push("ข้อสังเกต: ทุกเฟสมีออเดอร์เฉลี่ยเป้าหมาย ฿5,000 (50,000÷10, 200,000÷40, 450,000÷90) และ 5.4 ล้าน/ปี = 450,000 × 12");
+  return L.join("\n");
+}
+
+/* ---------- Agents ---------- */
+const AGENTS = [
+  { id: "hunter", kind: "agent", name: "ล่าสินค้า", short: "ล่าสินค้า", tag: "SKU HUNTER", color: "#F28C28", x: -12, z: -5,
+    role: "คัดสินค้า Brady ที่ควรลง Shopee Mall ก่อน ให้ได้ตามเป้า 30 → 80 → 150 รายการ และออเดอร์เฉลี่ยราว ฿5,000",
+    persona: 'คุณคือ "ล่าสินค้า" (SKU Hunter) เอเจนต์คัดสินค้าของ ACS ซึ่งเป็นตัวแทนจำหน่าย Brady อย่างเป็นทางการ (บาร์โค้ด, RFID, เครื่องพิมพ์ฉลาก, ป้ายความปลอดภัย) หน้าที่ของคุณคือเลือกสินค้าที่จะลงร้าน Shopee Mall ให้ได้ตามเป้า SKU และออเดอร์เฉลี่ยราว ฿5,000 และเขียนชื่อกับคำอธิบายสินค้าให้คนค้นเจอ ถ้าเอ่ยชื่อรุ่น ให้เตือนว่าต้องให้ Procurement ยืนยันสต็อกและราคา',
+    greet: "คัดสินค้า Brady ให้ร้าน Shopee Mall ของ ACS กดงานด่วนด้านบน หรือพิมพ์ชื่อรุ่นที่อยากลงขายแล้วถามได้เลย",
+    facts: [["30 SKU แรก", "14 พ.ย. 2569"], ["ยืนยันสต็อก", "Procurement · 31 ต.ค."], ["ธ.ค. / ม.ค.", "80 / 150 SKU"], ["ออเดอร์เฉลี่ยเป้าหมาย", "฿5,000"]],
+    board: { big: "30", bigLabel: "SKU แรก ภายใน 14 พ.ย.", rows: [["ยืนยันสต็อก", "31 ต.ค."], ["ธ.ค. / ม.ค.", "80 / 150"], ["ออเดอร์เฉลี่ย", "฿5,000"]], foot: "ทุกรุ่นต้องให้ Procurement ยืนยันสต็อกก่อนลงขาย" },
+    actions: [
+      { label: "ร่าง 30 SKU แรก",
+        prompt: () => "ร่างรายการ 30 SKU แรกสำหรับร้าน Shopee Mall ของ ACS จัดเป็นกลุ่มสินค้า ระบุจำนวนต่อกลุ่มให้รวมได้ 30 พอดี บอกเหตุผลของแต่ละกลุ่ม และวิธีทำให้ออเดอร์เฉลี่ยถึงราว ฿5,000 ยกตัวอย่างรุ่น Brady ได้ แต่ต้องระบุว่าให้ Procurement ยืนยันสต็อกและราคาก่อน 31 ต.ค. 2569",
+        fallback: `**ร่างโครง 30 SKU แรก** (ให้ Procurement ยืนยันสต็อกและราคาภายใน 31 ต.ค.)
+1. **เครื่องพิมพ์ฉลากพกพา · 6 รายการ** ราคาต่อชิ้นสูง ช่วยดันออเดอร์เฉลี่ยให้ถึง ฿5,000 ตัวอย่างรุ่น: BMP21-PLUS, M211, M611
+2. **ฉลากและตลับเทปของเครื่องในข้อ 1 · 10 รายการ** ของสิ้นเปลือง ทำให้ลูกค้ากลับมาซื้อซ้ำ
+3. **เครื่องพิมพ์ฉลากอุตสาหกรรม · 3 รายการ** ตัวอย่างรุ่น: i5300, i7100 สำหรับลูกค้าโรงงาน
+4. **ป้ายความปลอดภัยและอุปกรณ์ Lockout/Tagout · 6 รายการ** ฝ่ายความปลอดภัยของโรงงานสั่งเป็นชุด
+5. **ปลอกและฉลากสายไฟ · 3 รายการ** สำหรับผู้รับเหมาไฟฟ้าและดาต้าเซ็นเตอร์
+6. **ชุดเริ่มต้น (เครื่อง + ฉลาก 2 ม้วน) · 2 ชุด** ทำให้ออเดอร์เดียวเกิน ฿5,000 ง่ายขึ้น
+
+รวม 30 รายการ · เก็บฉลาก RFID ไว้เพิ่มในรอบ 80 SKU (ธ.ค.)
+
+ขั้นต่อไป: ส่งโครงนี้ให้ Procurement เลือกรุ่นที่มีสต็อกจริงในแต่ละกลุ่ม` },
+      { label: "เขียนชื่อสินค้าแบบ Shopee", needs: "พิมพ์ชื่อรุ่นหรือสินค้าในช่องด้านล่างก่อน แล้วกดปุ่มนี้อีกครั้ง",
+        prompt: t => "เขียนชื่อสินค้า 1 แบบ และคำอธิบาย 5 บรรทัด สำหรับขายใน Shopee Mall ของ ACS (ตัวแทนจำหน่าย Brady อย่างเป็นทางการ) ใส่คำที่คนไทยค้นหาไว้ต้นชื่อ ถ้าไม่แน่ใจสเปกให้เว้น [ใส่สเปก] แทนการเดา\n\nสินค้า: " + t,
+        fallback: `**สูตรชื่อสินค้า Shopee** (ใส่คำที่คนค้นหาไว้ต้นชื่อ)
+[แบรนด์] [รุ่น] [ประเภทสินค้า] [ใช้กับงานอะไร] | [ความน่าเชื่อถือ]
+
+ตัวอย่าง: Brady BMP21-PLUS เครื่องพิมพ์ฉลากพกพา พิมพ์ฉลากสายไฟ ป้ายเครื่องจักร | ของแท้ ตัวแทนจำหน่ายอย่างเป็นทางการ
+
+**คำอธิบาย 5 บรรทัด**
+- ใช้ทำงานอะไร (คำที่ลูกค้าค้นหา)
+- ใช้กับฉลากหรือเทปรุ่นไหน
+- สเปกหลัก 3 ข้อ
+- ในกล่องมีอะไร
+- การรับประกันและบริการหลังการขายจาก ACS
+
+ขั้นต่อไป: เปิดหน้านี้ใน Claude แล้วพิมพ์ชื่อรุ่น เอเจนต์จะเขียนให้ครบทั้งชื่อและคำอธิบาย` },
+    ] },
+  { id: "news", kind: "agent", name: "อ่านข่าว", short: "อ่านข่าว", tag: "NEWS DESK", color: "#3AA0E8", x: 0, z: -5,
+    role: "อ่านข่าวที่คุณวางให้ แล้วบอกทันทีว่าเป็นโอกาสขายหรือความเสี่ยงของ ACS และ Middle Property",
+    persona: 'คุณคือ "อ่านข่าว" (News Desk) อ่านข่าวที่ผู้ใช้วางมาแล้วแปลเป็นโอกาสขายหรือความเสี่ยงของกลุ่ม AMI ทั้ง ACS (บาร์โค้ด, RFID, ฉลาก Brady) และ Middle Property (อสังหาริมทรัพย์) คุณเปิดเว็บข่าวเองไม่ได้ ถ้าผู้ใช้ไม่ได้วางเนื้อข่าว ให้ขอเนื้อข่าว',
+    greet: "วางเนื้อข่าวในช่องด้านล่าง แล้วกด สรุปข่าวที่วาง เอเจนต์นี้เปิดเว็บข่าวเองไม่ได้ จึงอ่านจากข่าวที่คุณวางให้",
+    facts: [["เฝ้าดู", "5 หัวข้อ"], ["11.11", "ก่อนลงสินค้า"], ["12.12", "ก่อน Mall อนุมัติ"], ["BOI / EEC", "โรงงานใหม่ = ลีด"]],
+    board: { big: "5", bigLabel: "หัวข้อที่เฝ้าดู", rows: [["11.11", "ก่อนลงสินค้า"], ["12.12", "ก่อน Mall อนุมัติ"], ["BOI / EEC", "โรงงานใหม่ = ลีด"]], foot: "วางข่าวในแชท แล้วได้สรุปโอกาสขายทันที" },
+    actions: [
+      { label: "สรุปข่าวที่วาง", needs: "วางเนื้อข่าวในช่องด้านล่างก่อน แล้วกดปุ่มนี้อีกครั้ง",
+        prompt: t => "อ่านข่าวนี้แล้วตอบ 4 ข้อ: 1) ข่าวนี้คืออะไรใน 1 บรรทัด 2) เป็นโอกาสขายหรือความเสี่ยงต่อ ACS (บาร์โค้ด RFID ฉลาก Brady) หรือ Middle Property (อสังหา) อย่างไร 3) ใครคือผู้ซื้อที่ควรติดต่อ 4) สิ่งที่ควรทำภายใน 7 วัน\n\nข่าว:\n" + t,
+        fallback: `**เช็กลิสต์อ่านข่าว 4 ข้อ**
+1. ใครลงทุน ที่ไหน เมื่อไหร่
+2. โครงการนี้ต้องใช้ฉลาก บาร์โค้ด หรือ RFID แบบไหน หรือเป็นทำเลที่ Middle Property ควรจับ
+3. ใครคือผู้ซื้อตัวจริง: ผู้รับเหมา ฝ่ายจัดซื้อ หรือเจ้าของโครงการ
+4. ต้องติดต่อภายในกี่วันก่อนคู่แข่ง
+
+ขั้นต่อไป: เปิดหน้านี้ใน Claude แล้ววางข่าวในช่องแชท เอเจนต์จะตอบ 4 ข้อนี้ให้ทันที` },
+      { label: "ปฏิทินแคมเปญเทียบแผน",
+        prompt: () => "เทียบปฏิทินแคมเปญใหญ่ของ Shopee ช่วง พ.ย. 2569 – ม.ค. 2570 กับแผนงาน บอกว่าแคมเปญไหนมาก่อนหรือชนกับ milestone และควรเตรียมอะไร ถ้าไม่แน่ใจวันแคมเปญให้บอกว่าต้องตรวจใน Seller Center",
+        fallback: `**แคมเปญ Shopee เทียบกับแผน**
+- **11.11** มาก่อนวันลงสินค้า 30 รายการ (14 พ.ย.) ยอดเดือนแรกจึงต้องมาจากลูกค้าเดิมของ ACS
+- **12.12** มาก่อน Shopee Mall อนุมัติ (14 ธ.ค.) ใช้ช่วงนี้เก็บรีวิวจากร้านปกติไปก่อน
+- **1.1 ปี 2570** เป็นแคมเปญแรกที่ร้านมีสถานะ Mall และสินค้า 80 รายการขึ้นไป ควรเตรียมโปรโมชันตั้งแต่ปลาย ธ.ค.
+
+ขั้นต่อไป: ถามทีมว่ายื่น Shopee Mall ได้เร็วกว่า 14 พ.ย. หรือไม่ และตรวจวันแคมเปญจริงใน Seller Center` },
+    ] },
+  { id: "buyer", kind: "agent", name: "ลูกค้ารายใหญ่", short: "ลูกค้ารายใหญ่", tag: "WHALE FLOW", color: "#2FBF8F", x: 12, z: -5,
+    role: "ติดตามลูกค้าองค์กรที่ซื้อทีละมาก แล้วดึงลูกค้าเดิมมาซื้อซ้ำผ่าน Shopee Mall",
+    persona: 'คุณคือ "ลูกค้ารายใหญ่" (Whale Flow) เอเจนต์ติดตามลูกค้าองค์กรที่ซื้อทีละมากของ ACS เช่น โรงงาน ผู้รับเหมาไฟฟ้า คลังสินค้า โรงพยาบาล หน้าที่คือหาว่าใครกำลังจะใช้งบ ดึงลูกค้าเดิมมาซื้อซ้ำผ่าน Shopee Mall และร่างข้อความติดต่อ',
+    greet: "ติดตามลูกค้าองค์กรที่ซื้อทีละมาก เป้า ม.ค. 2570 คือ 90 ออเดอร์ต่อเดือน ส่วนใหญ่ควรมาจากลูกค้าประจำ",
+    facts: [["เป้า ม.ค. 2570", "90 ออเดอร์/เดือน"], ["ลูกค้าประจำที่ต้องมี", "~30 ราย (สมมติฐาน)"], ["กลุ่มที่ตาม", "4 กลุ่ม"], ["ออเดอร์เฉลี่ย", "฿5,000"]],
+    board: { big: "90", bigLabel: "ออเดอร์/เดือน ภายใน ม.ค. 70", rows: [["ลูกค้าประจำ", "~30 ราย*"], ["กลุ่มที่ตาม", "4 กลุ่ม"], ["ออเดอร์เฉลี่ย", "฿5,000"]], foot: "* สมมติฐาน: ลูกค้าแต่ละรายสั่งราว 3 ครั้งต่อเดือน" },
+    actions: [
+      { label: "จัดลำดับกลุ่มลูกค้า",
+        prompt: () => "จัดลำดับกลุ่มลูกค้าองค์กรที่ ACS ควรตามก่อน เพื่อให้ถึง 90 ออเดอร์ต่อเดือนภายใน ม.ค. 2570 บอกสินค้า Brady ที่ตรงกับแต่ละกลุ่ม ผู้มีอำนาจซื้อ และประโยคเปิดการคุย 1 ประโยค",
+        fallback: `**4 กลุ่มลูกค้าองค์กรที่ควรตามก่อน**
+1. **โรงงานผลิต** ฉลากเครื่องจักร ป้ายความปลอดภัย Lockout/Tagout · ผู้ซื้อ: จป. และฝ่ายซ่อมบำรุง
+2. **ผู้รับเหมาไฟฟ้าและดาต้าเซ็นเตอร์** ฉลากสายไฟ ปลอกหด · ผู้ซื้อ: วิศวกรโครงการ
+3. **คลังสินค้าและโลจิสติกส์** บาร์โค้ด RFID ฉลากชั้นวาง · ผู้ซื้อ: ผู้จัดการคลัง
+4. **โรงพยาบาลและแล็บ** ฉลากหลอดตัวอย่าง ฉลากทนสารเคมี · ผู้ซื้อ: ฝ่ายจัดซื้อ
+
+**ทำไมต้องมีลูกค้าประจำ:** เป้า 90 ออเดอร์ต่อเดือน ถ้าลูกค้าแต่ละรายสั่งราว 3 ครั้งต่อเดือน ต้องมีลูกค้าประจำประมาณ 30 ราย (สมมติฐาน)
+
+ขั้นต่อไป: ดึงรายชื่อลูกค้าเดิมของ ACS ที่ซื้อซ้ำในปีนี้ แล้วแยกตาม 4 กลุ่ม` },
+      { label: "ร่างข้อความถึงลูกค้าเดิม",
+        prompt: t => "ร่างข้อความ LINE สั้น ๆ ถึงลูกค้าเดิมของ ACS เพื่อชวนสั่งสินค้า Brady ผ่านร้าน Shopee Mall บอกด้วยว่าควรส่งเมื่อไหร่ตามแผน ใช้ [ชื่อลูกค้า] และ [ชื่อร้าน] เป็นช่องว่าง" + (t ? "\n\nข้อมูลเพิ่มเติมจากผู้ใช้: " + t : ""),
+        fallback: `**ข้อความ LINE ถึงลูกค้าเดิม** (ส่งหลังลงสินค้า 14 พ.ย.)
+
+> สวัสดีครับ/ค่ะ คุณ[ชื่อลูกค้า] จาก ACS ตอนนี้สั่งสินค้า Brady ที่ใช้อยู่ผ่าน Shopee ได้แล้ว ค้นหา "[ชื่อร้าน]" สั่งได้ตลอด 24 ชม. และติดตามพัสดุได้ในแอป ถ้าต้องการใบเสนอราคาหรือสั่งจำนวนมาก ทักมาที่ช่องทางเดิมได้เลย
+
+- แนบลิงก์ร้านและสินค้าที่ลูกค้าเคยซื้อ 2–3 รายการ
+- ส่งให้ลูกค้าที่ซื้อซ้ำก่อน แล้วค่อยขยายไปรายอื่น
+
+ขั้นต่อไป: เลือกลูกค้า 20 รายแรกจากรายชื่อที่ซื้อซ้ำ` },
+    ] },
+  { id: "property", kind: "agent", name: "Middle Property", short: "อสังหา", tag: "PROPERTY AGENT", color: "#E3B341", x: -12, z: 6,
+    role: "ทำงานเอเจนต์อสังหาออนไลน์ให้ Middle Property: เขียนประกาศขายและเช่า คัดกรองลีด และตอบลูกค้า",
+    persona: "คุณคือเอเจนต์อสังหาออนไลน์ของ Middle Property บริษัทลูกในโฮลดิ้งของกลุ่ม AMI เจ้าของต้องการสร้างธุรกิจเอเจนต์อสังหาออนไลน์ที่ทำรายได้สูง หน้าที่คือเขียนประกาศขายและเช่า คัดกรองลีด ตอบลูกค้า และวางแผนหาลีดออนไลน์ ห้ามแต่งข้อมูลทรัพย์ ราคา หรือข้อกฎหมาย เรื่องสัญญาหรือภาษีให้แนะนำให้ตรวจกับผู้เชี่ยวชาญ",
+    greet: "เอเจนต์อสังหาออนไลน์ของ Middle Property วางรายละเอียดทรัพย์ในช่องด้านล่างเพื่อให้เขียนประกาศ หรือถามเรื่องการหาลีดได้เลย",
+    facts: [["ลีดใหม่", "ยังไม่มีข้อมูล"], ["นัดดู / ปิดดีล", "ยังไม่มีข้อมูล"], ["ในแผนโฮลดิ้ง", "2570 – 2572"], ["คัดกรองลีด", "5 คำถาม"]],
+    board: { big: "—", bigLabel: "ลีดอสังหา (ยังไม่มีข้อมูล)", rows: [["งานหลัก", "ประกาศ · ลีด · นัดดู"], ["ในแผนโฮลดิ้ง", "2570 – 2572"], ["คัดกรองลีด", "5 คำถาม"]], foot: "ลีดร้อนควรได้นัดดูภายใน 48 ชั่วโมง" },
+    actions: [
+      { label: "เขียนประกาศขาย/เช่า", needs: "วางรายละเอียดทรัพย์ในช่องด้านล่างก่อน เช่น ประเภท ทำเล ขนาด ราคา แล้วกดปุ่มนี้อีกครั้ง",
+        prompt: t => "เขียนประกาศขายหรือเช่าอสังหาสำหรับลงออนไลน์จากข้อมูลนี้ มีหัวข้อดึงดูด ข้อมูลหลัก ทำเล จุดเด่น 3 ข้อ และปิดท้ายชวนนัดดู ข้อมูลไหนไม่มีให้เว้น [ช่องว่าง] ห้ามแต่งเพิ่ม\n\nข้อมูลทรัพย์: " + t,
+        fallback: `**โครงประกาศขาย/เช่าที่ได้ลีด**
+- **หัวข้อ:** [ประเภททรัพย์] [ทำเลหรือสถานีใกล้] [จุดขายเด่น 1 ข้อ] [ราคา]
+- **ข้อมูลหลัก:** ขนาด ห้องนอน ห้องน้ำ ชั้น ทิศ ที่จอดรถ
+- **ทำเล:** ระยะเดินถึงรถไฟฟ้า ห้าง โรงเรียน โรงพยาบาล
+- **จุดเด่น 3 ข้อ** ที่คนในทำเลนั้นสนใจ
+- **เงื่อนไข:** เงินมัดจำ สัญญา ค่าส่วนกลาง
+- **ปิดท้าย:** นัดดูได้วันไหน ติดต่อช่องทางใด
+- ลงรูป 10–15 รูป เริ่มจากรูปห้องที่สว่างที่สุด
+
+ขั้นต่อไป: เปิดหน้านี้ใน Claude แล้ววางรายละเอียดทรัพย์ เอเจนต์จะเขียนประกาศให้` },
+      { label: "คัดกรองลีด 5 คำถาม",
+        prompt: t => "ออกแบบชุดคำถามคัดกรองลีดอสังหาออนไลน์ 5 ข้อสำหรับ Middle Property พร้อมเกณฑ์แยกลีดร้อน อุ่น และเย็น และข้อความตอบกลับอัตโนมัติ 1 ข้อความ" + (t ? "\n\nบริบทเพิ่มเติม: " + t : ""),
+        fallback: `**คัดกรองลีดด้วย 5 คำถาม**
+1. งบประมาณเท่าไหร่ (ซื้อ) หรือค่าเช่าต่อเดือนเท่าไหร่ (เช่า)
+2. ทำเลที่ต้องการ และต้องใกล้อะไร
+3. ซื้ออยู่เองหรือซื้อลงทุน
+4. ยื่นกู้หรือได้อนุมัติเบื้องต้นจากธนาคารแล้วหรือยัง
+5. ต้องการเข้าอยู่เมื่อไหร่
+
+ลีดที่ตอบข้อ 1, 4 และ 5 ได้ชัด คือลีดร้อน ควรนัดดูภายใน 48 ชั่วโมง
+
+ขั้นต่อไป: ตั้ง 5 คำถามนี้เป็นข้อความตอบกลับอัตโนมัติในทุกช่องทางที่ลงประกาศ` },
+    ] },
+  { id: "risk", kind: "agent", name: "Risk Desk", short: "Risk Desk", tag: "RISK AGENT", color: "#E5404F", x: 12, z: 6,
+    role: "ถามคำถามยากก่อนทุกการตัดสินใจ ทั้งเรื่องเงินสด สต็อก กฎ Shopee Mall โครงสร้างโฮลดิ้ง และเกณฑ์ mai",
+    persona: "คุณคือ Risk Desk เอเจนต์บริหารความเสี่ยง หน้าที่คือถามคำถามยากก่อนทุกการตัดสินใจ เรื่องเงินสด สต็อก กฎของ Shopee Mall โครงสร้างโฮลดิ้ง และเกณฑ์ mai ให้ระดับความเสี่ยง สูง/กลาง/ต่ำ และวิธีลดความเสี่ยงเสมอ คุณไม่ใช่ที่ปรึกษากฎหมายหรือผู้สอบบัญชี ให้บอกเมื่อควรถามผู้เชี่ยวชาญ",
+    greet: "พิมพ์เรื่องที่กำลังจะตัดสินใจ แล้วกด ตรวจการตัดสินใจนี้ หรือกด เช็กเป้าหมายในแผน เพื่อดูข้อที่ต้องระวัง",
+    facts: [["ความเสี่ยงสูง", "2 ข้อ", "high"], ["ความเสี่ยงกลาง", "3 ข้อ", "mid"], ["ความเสี่ยงต่ำ", "1 ข้อ", "low"], ["สถานะ", "รอการตัดสินใจ"]],
+    board: { big: "6", bigLabel: "ข้อที่ต้องเฝ้าระวัง", rows: [["สูง", "2 ข้อ"], ["กลาง", "3 ข้อ"], ["สถานะ", "รอการตัดสินใจ"]], foot: "ถามก่อนลงมือ: ถ้าผิด เสียเท่าไหร่ ย้อนกลับได้ไหม" },
+    actions: [
+      { label: "ตรวจการตัดสินใจนี้", needs: "พิมพ์เรื่องที่กำลังจะตัดสินใจในช่องด้านล่างก่อน แล้วกดปุ่มนี้อีกครั้ง",
+        prompt: t => "ตรวจการตัดสินใจนี้ก่อนลงมือ ตอบ: ระดับความเสี่ยง (สูง/กลาง/ต่ำ) ถ้าผิดเสียอะไร ย้อนกลับได้ไหม กระทบเป้าหมายข้อไหนในแผน วิธีลดความเสี่ยง และตัวเลขที่บอกว่าควรหยุด\n\nการตัดสินใจ: " + t,
+        fallback: `**5 คำถามก่อนตัดสินใจ**
+1. ถ้าผิด เสียเงินเท่าไหร่ และกระแสเงินสดรับไหวไหม
+2. ย้อนกลับได้ไหม ใช้เวลาเท่าไหร่
+3. กระทบเป้าหมายข้อไหนในแผน (SKU, ออเดอร์, ยอดขาย, โครงสร้าง IPO)
+4. ใครรับผิดชอบ และรายงานผลเมื่อไหร่
+5. ตัวเลขไหนจะบอกว่าควรหยุด
+
+ขั้นต่อไป: เปิดหน้านี้ใน Claude แล้วพิมพ์เรื่องที่จะตัดสินใจ Risk Desk จะตอบ 5 ข้อนี้พร้อมระดับความเสี่ยง` },
+      { label: "เช็กเป้าหมายในแผน",
+        prompt: () => "ตรวจว่าเป้าหมายในแผนสมจริงแค่ไหน ดูเรื่องออเดอร์เฉลี่ย อัตราการโตแต่ละเดือน จังหวะแคมเปญ Shopee ช่องว่างระหว่างยอดขายออนไลน์กับเกณฑ์กำไรของ mai และโครงสร้างโฮลดิ้ง เรียงจากความเสี่ยงสูงไปต่ำ",
+        fallback: `**เป้าหมายข้อไหนต้องระวัง**
+- **สูง · ออเดอร์เฉลี่ย ฿5,000 ทุกเฟส** 50,000 ÷ 10, 200,000 ÷ 40 และ 450,000 ÷ 90 ได้ ฿5,000 เท่ากัน ฉลากอย่างเดียวทำถึงยาก ออเดอร์ส่วนใหญ่ต้องมีเครื่องพิมพ์หรือชุดสินค้า
+- **สูง · ทางไป mai** ยอดออนไลน์ 5.4 ล้านต่อปีเป็นรายได้ ไม่ใช่กำไร เกณฑ์ mai ใช้กำไรสุทธิปีล่าสุด ≥ 25 ล้านบาท จึงต้องมาจากกำไรรวมทั้งกลุ่ม
+- **กลาง · โตเร็วมาก** ออเดอร์ต้องโต ×4 จาก พ.ย. ไป ธ.ค. และ ×2.25 จาก ธ.ค. ไป ม.ค.
+- **กลาง · จังหวะแคมเปญ** 11.11 และ 12.12 มาก่อนวันลงสินค้าและวันที่ Mall อนุมัติ
+- **กลาง · โครงสร้างโฮลดิ้ง** สำนักงานกฎหมายในโฮลดิ้งยังรอความเห็นกฎหมาย
+- **ต่ำ · เกณฑ์ mai** ตรวจกับเว็บไซต์ SET ฉบับล่าสุดก่อนยื่น
+
+ขั้นต่อไป: ตั้งเป้าสัดส่วนออเดอร์ที่มีเครื่องพิมพ์ แล้ววัดตั้งแต่ออเดอร์แรก` },
+    ] },
+];
+const SPECIALS = [
+  { id: "meeting", kind: "meeting", name: "ห้องประชุม", short: "ห้องประชุม", tag: "MEETING ROOM", color: "#7B5CF0", spot: { x: 0, z: 9.4 },
+    role: "เอเจนต์ทั้ง 5 รายงานพร้อมกัน แล้วสรุปสิ่งที่ต้องทำวันนี้ก่อนถึงงานถัดไป", talk: "เข้าห้องประชุม" },
+  { id: "ipo", kind: "ipo", name: "แผน AMI สู่ IPO", short: "แผน IPO", tag: "IPO ROADMAP", color: "#4D7CF5", spot: { x: 0, z: -12 },
+    role: "Roadmap ต.ค. 2569 – 2579 ทั้ง 3 ระยะ พร้อมนับถอยหลังถึงงานถัดไป", talk: "ดูแผน IPO" },
+  { id: "leader", kind: "leader", name: "เป้าหมาย Shopee Mall", short: "เป้าหมาย", tag: "LIVE TARGETS", color: "#9FB8E8", spot: { x: -15.5, z: -12 },
+    role: "จำนวน SKU ออเดอร์ และยอดขายเป้าหมายของแต่ละเดือนในระยะที่ 1", talk: "ดูเป้าหมาย" },
+];
+for (const a of AGENTS) { a.spot = { x: a.x, z: a.z + 1.75 }; a.talk = "คุยกับ " + a.name; }
+const ALL = [...AGENTS, ...SPECIALS];
+const T = Object.fromEntries(ALL.map(t => [t.id, t]));
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const mix = (h, h2, t) => { const a = hexRgb(h), b = hexRgb(h2); return "#" + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, "0")).join(""); };
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const COARSE = matchMedia("(pointer: coarse)").matches;
+
+function inline(s) {
+  return s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>");
+}
+function md(src) {
+  const lines = esc(src).split("\n");
+  let html = "", list = null;
+  const close = () => { if (list) { html += "</" + list + ">"; list = null; } };
+  for (const raw of lines) {
+    const line = raw.replace(/\s+$/, "");
+    let m;
+    if ((m = line.match(/^\s*[-*•]\s+(.*)$/))) { if (list !== "ul") { close(); html += "<ul>"; list = "ul"; } html += "<li>" + inline(m[1]) + "</li>"; continue; }
+    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) { if (list !== "ol") { close(); html += "<ol>"; list = "ol"; } html += "<li>" + inline(m[1]) + "</li>"; continue; }
+    close();
+    if (!line.trim()) continue;
+    if ((m = line.match(/^#{1,6}\s+(.*)$/))) { html += "<h4>" + inline(m[1]) + "</h4>"; continue; }
+    if ((m = line.match(/^&gt;\s?(.*)$/))) { html += "<blockquote>" + inline(m[1]) + "</blockquote>"; continue; }
+    if (/^-{3,}$/.test(line.trim())) continue;
+    html += "<p>" + inline(line) + "</p>";
+  }
+  close();
+  return html;
+}
+
+/* ---------- AI (Claude via the artifact "sample" capability) ---------- */
+let sample = null, aiState = "connecting", busy = false, ctl = null;
+const AI_SHORT = { connecting: "กำลังเชื่อม", live: "AI สด", offline: "โหมดแผนงาน", denied: "ยังไม่อนุญาต AI" };
+const AI_TEXT = { connecting: "กำลังเชื่อม AI…", live: "AI สด · ใช้บัญชี Claude ของคุณ", offline: "โหมดแผนงาน · คุยสดได้เมื่อเปิดใน Claude", denied: "ยังไม่ได้อนุญาตให้ใช้ Claude" };
+function setAI(state) {
+  aiState = state;
+  $("aiChip").className = "chip glass ai " + state;
+  $("aiText").textContent = AI_TEXT[state];
+  $("aiShort").textContent = AI_SHORT[state];
+  updateComposer();
+  if (window.__redrawBoards) window.__redrawBoards();
+}
+(async () => {
+  try {
+    if (window.claude && typeof window.claude.use === "function") sample = await window.claude.use("sample");
+  } catch (e) { sample = null; }
+  setAI(sample ? "live" : "offline");
+})();
+
+function rulesFor(a) {
+  return [
+    'คุณเป็นเอเจนต์ AI ใน "AMI Agent Office" สำนักงานเสมือนของกลุ่ม AMI Asiancodingsystems GROUP เจ้าของแผนคือคุณ' + OWNER + " ผู้ต้องการสร้างธุรกิจออนไลน์ที่เติบโตจนเข้าตลาดหลักทรัพย์ และสร้างธุรกิจเอเจนต์อสังหาออนไลน์",
+    a.persona,
+    "",
+    "ข้อมูลแผนงาน (ตัวเลขทั้งหมดเป็นเป้าหมาย ไม่ใช่ผลจริง):",
+    planContext(),
+    "",
+    "วันนี้คือ " + fmtLong(TODAY) + (NEXT ? " งานถัดไปคือ " + NEXT.title + " วันที่ " + fmtLong(NEXT.d) + " (" + daysText(daysTo(NEXT.d)) + ")" : ""),
+    "",
+    "กติกาการตอบ:",
+    "- ตอบภาษาไทย สั้นและตรง ใช้หัวข้อย่อยหรือรายการลำดับได้ ห้ามใช้ตาราง",
+    "- ใช้ภาษาสุภาพแบบทีมงาน ไม่ต้องลงท้ายครับหรือค่ะทุกประโยค",
+    "- อย่าแต่งยอดขายหรือข้อมูลจริงที่ไม่มีให้ ถ้าต้องใช้ข้อมูลเพิ่ม ให้บอกว่าต้องใช้อะไร",
+    "- ตัวเลขที่คุณคำนวณหรือสมมติขึ้น ให้บอกว่าเป็นสมมติฐาน",
+    "- คุณเปิดเว็บหรือลิงก์ไม่ได้",
+    '- ปิดท้ายด้วยบรรทัด "ขั้นต่อไป:" 1 บรรทัด',
+  ].join("\n");
+}
+const turns = {};
+const ERR = {
+  rate_limited: "ใช้งาน Claude ถี่เกินไป ลองใหม่อีกครั้งในอีกสักครู่",
+  session_expired: "ต้องเข้าสู่ระบบ Claude ใหม่ แล้วลองอีกครั้ง",
+  refused: "Claude ไม่ตอบคำถามนี้ ลองเปลี่ยนวิธีถาม",
+  empty_completion: "ไม่ได้คำตอบ ลองถามให้แคบลง",
+  prompt_too_large: "ข้อความยาวเกินไป ลองตัดให้สั้นลง",
+  upstream_error: "การเชื่อมต่อขัดข้อง กดส่งใหม่ได้",
+};
+const DENY = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"];
+
+async function askLive(id, content, display) {
+  if (!sample || busy) return;
+  const a = T[id];
+  const hist = turns[id] || (turns[id] = []);
+  hist.push({ role: "user", content });
+  addMsg(id, "me", esc(display));
+  const out = addMsg(id, "agent", '<span class="thinking">กำลังคิด</span>', "AI สด");
+  setBusy(true);
+  ctl = new AbortController();
+  let recent = hist.slice(-10);
+  while (recent.length && recent[0].role !== "user") recent = recent.slice(1);
+  try {
+    const res = await sample([{ role: "user", content: rulesFor(a) }, ...recent], {
+      cache: false, signal: ctl.signal,
+      onText: ({ text }) => { out.innerHTML = md(text); scrollLog(); },
+    });
+    hist.push({ role: "assistant", content: res.text });
+    out.innerHTML = md(res.text) + (res.truncated ? '<p class="note">คำตอบถูกตัดกลางทาง ลองถามทีละเรื่อง</p>' : "");
+  } catch (e) {
+    hist.pop();
+    const code = e && e.code;
+    if (code === "cancelled") { out.innerHTML = (e.text ? md(e.text) : "") + '<p class="note">หยุดแล้ว</p>'; }
+    else if (DENY.includes(code)) {
+      sample = null; setAI(code === "not_granted" ? "denied" : "offline");
+      out.innerHTML = md("ยังใช้ Claude ในหน้านี้ไม่ได้ ใช้ปุ่มงานด่วนเพื่อดูแผนงานสำเร็จรูปแทน");
+    } else {
+      out.innerHTML = (e && e.text && code !== "refused" ? md(e.text) : "") + '<p class="note">' + esc(ERR[code] || ERR.upstream_error) + "</p>";
+    }
+  } finally {
+    setBusy(false); scrollLog();
+  }
+}
+
+/* ---------- Sheet + chat UI ---------- */
+let current = null;
+const logs = {};
+function logFor(id) {
+  if (logs[id]) return logs[id];
+  const el = document.createElement("div");
+  el.className = "log";
+  logs[id] = el;
+  return el;
+}
+function addMsg(id, who, html, src) {
+  const el = document.createElement("div");
+  el.className = "msg " + who;
+  const a = T[id];
+  el.style.setProperty("--c", a.color);
+  el.innerHTML = who === "agent"
+    ? '<div class="who"><span>' + esc(a.name) + '</span><span class="src">' + esc(src || "") + '</span></div><div class="body">' + html + "</div>"
+    : '<div class="body">' + html + "</div>";
+  logFor(id).append(el);
+  scrollLog();
+  return el.querySelector(".body");
+}
+function scrollLog() { const b = $("sheetBody"); if (b) b.scrollTop = b.scrollHeight; }
+function setBusy(v) {
+  busy = v;
+  $("stopBtn").hidden = !v;
+  document.querySelectorAll(".act, .primary[data-live]").forEach(b => { b.disabled = v; });
+  updateComposer();
+}
+function updateComposer() {
+  const live = aiState === "live" && !!sample;
+  $("sendBtn").disabled = !live || busy;
+  $("liveNote").textContent = live ? (busy ? "เอเจนต์กำลังตอบ" : "Enter เพื่อส่ง · Shift+Enter ขึ้นบรรทัดใหม่")
+    : aiState === "connecting" ? "กำลังเชื่อม Claude…" : "คุยสดได้เมื่อเปิดหน้านี้ใน Claude · ปุ่มงานด่วนใช้ได้เสมอ";
+  const mp = $("meetLive"); if (mp) mp.hidden = !live;
+}
+
+function runAction(id, i) {
+  if (busy) return;
+  const a = T[id], act = a.actions[i];
+  const t = $("msg").value.trim();
+  if (aiState === "live" && sample) {
+    if (act.needs && !t) { addMsg(id, "agent", "<p>" + esc(act.needs) + "</p>", "ระบบ"); $("msg").focus(); return; }
+    if (t) $("msg").value = "";
+    askLive(id, act.prompt(t), act.label + (t ? " · " + (t.length > 60 ? t.slice(0, 60) + "…" : t) : ""));
+  } else {
+    addMsg(id, "me", esc(act.label));
+    addMsg(id, "agent", md(act.fallback), "แผนงานสำเร็จรูป");
+  }
+}
+
+function factsHTML(list) {
+  return '<dl class="facts">' + list.map(([k, v, sev]) => '<div class="fact' + (sev ? " sev-" + sev : "") + '"><dt>' + esc(k) + "</dt><dd>" + esc(v) + "</dd></div>").join("") + "</dl>";
+}
+function agentBody(a) {
+  const body = $("sheetBody");
+  body.innerHTML = '<p class="role">' + esc(a.role) + "</p>" + factsHTML(a.facts) +
+    '<p class="label">งานด่วน</p><div class="actions">' +
+    a.actions.map((x, i) => '<button type="button" class="act" data-i="' + i + '" style="--c:' + a.color + '">' + esc(x.label) + "</button>").join("") +
+    '</div><p class="label">บทสนทนา</p>';
+  const log = logFor(a.id);
+  if (!log.childElementCount) addMsg(a.id, "agent", "<p>" + esc(a.greet) + "</p>", "เอเจนต์");
+  body.append(log);
+  body.querySelectorAll(".act").forEach(b => { b.disabled = busy; b.onclick = () => runAction(a.id, Number(b.dataset.i)); });
+}
+
+function meetingFallback() {
+  const n = NEXT;
+  const head = n ? "งานถัดไป: **" + n.title + "** " + fmtLong(n.d) + " (" + daysText(daysTo(n.d)) + ")" : "ระยะที่ 1 ครบทุกวันในแผนแล้ว ต่อด้วยระยะที่ 2 · ปรับโครงสร้าง";
+  const todo = n ? n.items : LATER[0].items;
+  return "**ประชุมเช้า · " + fmtLong(TODAY) + "**\n" + head + "\n" +
+    "- **ล่าสินค้า:** เตรียมรายการให้ถึง " + NEXT_SKU.sku + " SKU ภายใน " + fmtShort(NEXT_SKU.d) + " ทุกรุ่นต้องให้ Procurement ยืนยันสต็อก\n" +
+    "- **อ่านข่าว:** เฝ้าดู 11.11, 12.12 และข่าวโรงงานใหม่ใน EEC\n" +
+    "- **ลูกค้ารายใหญ่:** แยกลูกค้าเดิมที่ซื้อซ้ำเป็น 4 กลุ่ม เพื่อหาลูกค้าประจำราว 30 ราย (สมมติฐาน)\n" +
+    "- **Middle Property:** เตรียมโครงประกาศและ 5 คำถามคัดกรองลีด\n" +
+    "- **Risk Desk:** ออเดอร์เฉลี่ยเป้าหมาย ฿5,000 ต้องมีเครื่องพิมพ์ในออเดอร์ส่วนใหญ่\n\n" +
+    "**ทำวันนี้**\n" + todo.map((x, i) => (i + 1) + ". " + x).join("\n");
+}
+function meetingBody(t) {
+  const body = $("sheetBody");
+  body.innerHTML = '<p class="role">' + esc(t.role) + "</p>" +
+    '<div class="actions" id="meetLive"' + (aiState === "live" && sample ? "" : " hidden") + '><button type="button" class="primary" data-live="1" id="meetBtn">ให้ AI ประชุมสด</button></div>' +
+    '<div class="msg agent" style="--c:' + t.color + '"><div class="who"><span>สรุปการประชุม</span><span class="src" id="meetSrc">แผนงานสำเร็จรูป</span></div><div class="body" id="meetOut">' + md(meetingFallback()) + "</div></div>";
+  const btn = $("meetBtn");
+  btn.disabled = busy;
+  btn.onclick = async () => {
+    if (!sample || busy) return;
+    const out = $("meetOut"), src = $("meetSrc");
+    out.innerHTML = '<span class="thinking">เอเจนต์กำลังประชุม</span>'; src.textContent = "AI สด";
+    setBusy(true); ctl = new AbortController();
+    const prompt = rulesFor({ persona: "คุณเป็นผู้ดำเนินการประชุมเช้าของเอเจนต์ทั้ง 5 ตัว: ล่าสินค้า, อ่านข่าว, ลูกค้ารายใหญ่, Middle Property และ Risk Desk" }) +
+      "\n\nจัดประชุมเช้า: ให้เอเจนต์แต่ละตัวรายงานคนละ 1–2 บรรทัด ขึ้นต้นด้วย **ชื่อเอเจนต์:** แล้วสรุป **ทำวันนี้ 3 ข้อ** ที่ช่วยให้ทันงานถัดไป";
+    try {
+      const res = await sample(prompt, { signal: ctl.signal, onText: ({ text }) => { out.innerHTML = md(text); } });
+      out.innerHTML = md(res.text);
+    } catch (e) {
+      const code = e && e.code;
+      if (DENY.includes(code)) { sample = null; setAI(code === "not_granted" ? "denied" : "offline"); }
+      out.innerHTML = md(meetingFallback()) + (code === "cancelled" ? "" : '<p class="note">' + esc(DENY.includes(code) ? "ยังใช้ Claude ในหน้านี้ไม่ได้ จึงแสดงสรุปจากแผนงานแทน" : (ERR[code] || ERR.upstream_error)) + "</p>");
+      src.textContent = "แผนงานสำเร็จรูป";
+    } finally { setBusy(false); }
+  };
+}
+function ipoBody(t) {
+  const body = $("sheetBody");
+  const li = MILESTONES.map(m => {
+    const n = daysTo(m.d), isNext = NEXT && m === NEXT;
+    const state = n < 0 ? "เลยกำหนดแล้ว" : (isNext ? "ถัดไป · " : "") + daysText(n);
+    return '<li class="' + (isNext ? "next" : "") + '"><div class="when"><span>' + fmtLong(m.d) + '</span><span class="state">' + state + "</span></div><ul>" + m.items.map(i => "<li>" + esc(i) + "</li>").join("") + "</ul></li>";
+  }).join("");
+  body.innerHTML = '<p class="role">เจ้าของแผน: ' + OWNER + ' · จัดทำ ต.ค. 2569</p><p><span class="pill warn">ตัวเลขทั้งหมดเป็น "เป้าหมาย" ไม่ใช่ผลจริง</span></p>' +
+    '<p class="phase">ระยะที่ 1 · เปิด Shopee Mall และขยายยอดขายออนไลน์<small>ต.ค. 2569 – ม.ค. 2570</small></p><ol class="tl">' + li + "</ol>" +
+    LATER.map(p => '<p class="phase">' + p.phase + "<small>" + p.span + '</small></p><ol class="tl"><li><ul>' + p.items.map(i => "<li>" + esc(i) + "</li>").join("") + "</ul></li></ol>").join("") +
+    '<p class="foot">ช่วง 2570–2579 ไม่ได้วาดตามสเกลเวลาจริง · เกณฑ์ mai อ้างอิงเว็บไซต์ SET ควรตรวจสอบเกณฑ์ล่าสุดก่อนยื่น</p>' +
+    '<div class="actions"><button type="button" class="secondary" id="askRisk">ให้ Risk Desk ตรวจแผนนี้</button></div>';
+  $("askRisk").onclick = () => { openSheet("risk"); runAction("risk", 1); };
+}
+function leaderBody(t) {
+  const body = $("sheetBody");
+  const rows = MILESTONES.filter(m => m.sku).map(m => '<tr class="' + (m === NEXT_SKU ? "next" : "") + '"><td>' + fmtLong(m.d) + '</td><td class="num">' + m.sku + '</td><td class="num">' + m.orders + '</td><td class="num">' + baht(m.sales) + '</td><td class="num">' + baht(m.sales / m.orders) + "</td></tr>").join("");
+  body.innerHTML = '<p class="role">' + esc(t.role) + '</p><p><span class="pill warn">ตัวเลขทั้งหมดเป็น "เป้าหมาย" ไม่ใช่ผลจริง</span></p>' +
+    '<div class="tbl-wrap"><table><thead><tr><th>วันที่</th><th>SKU</th><th>ออเดอร์/เดือน</th><th>ยอด/เดือน</th><th>ออเดอร์เฉลี่ย</th></tr></thead><tbody>' + rows +
+    '<tr><td>2570 – 2572</td><td class="num">—</td><td class="num">—</td><td class="num" colspan="2">เกิน ฿5.4 ล้าน/ปี</td></tr></tbody></table></div>' +
+    factsHTML([["ออเดอร์ พ.ย. → ธ.ค.", "×4"], ["ออเดอร์ ธ.ค. → ม.ค.", "×2.25"], ["ออเดอร์เฉลี่ยทุกเฟส", "฿5,000"], ["5.4 ล้าน/ปี", "= ฿450,000 × 12"]]) +
+    '<p class="foot">ผลจริงยังไม่ได้บันทึกในหน้านี้ ตัวเลขทั้งหมดมาจากแผนงาน AMI สู่ IPO</p>';
+}
+
+function openSheet(id) {
+  const t = T[id]; if (!t) return;
+  current = id;
+  $("sheet").style.setProperty("--c", t.color);
+  $("sheetSwatch").style.background = t.color;
+  $("sheetTag").textContent = t.tag;
+  $("sheetTitle").textContent = t.name;
+  $("composer").hidden = t.kind !== "agent";
+  if (t.kind === "agent") { agentBody(t); $("msg").placeholder = "พิมพ์ถาม " + t.name + " หรือวางข้อมูลที่ต้องการให้ช่วย"; }
+  else if (t.kind === "meeting") meetingBody(t);
+  else if (t.kind === "ipo") ipoBody(t);
+  else leaderBody(t);
+  $("sheet").hidden = false;
+  document.body.classList.add("sheet-open");
+  updateComposer();
+  scrollLog();
+  if (t.kind !== "agent") $("sheetBody").scrollTop = 0;
+  if (window.__layout) window.__layout();
+  if (window.__syncTalk) window.__syncTalk();
+}
+function closeSheet() {
+  $("sheet").hidden = true; current = null;
+  document.body.classList.remove("sheet-open");
+  if (window.__layout) window.__layout();
+  if (window.__syncTalk) window.__syncTalk();
+  $("scene").focus({ preventScroll: true });
+}
+$("closeSheet").onclick = closeSheet;
+$("stopBtn").onclick = () => { if (ctl) ctl.abort(); };
+$("composer").addEventListener("submit", e => {
+  e.preventDefault();
+  const t = $("msg").value.trim();
+  if (!t || !current || T[current].kind !== "agent" || busy) return;
+  if (!(aiState === "live" && sample)) { addMsg(current, "agent", "<p>คุยสดได้เมื่อเปิดหน้านี้ใน Claude ระหว่างนี้ใช้ปุ่มงานด่วนด้านบนได้</p>", "ระบบ"); return; }
+  $("msg").value = "";
+  askLive(current, t, t);
+});
+$("msg").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); const f = $("composer"); if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event("submit", { cancelable: true })); }
+});
+
+/* ---------- HUD ---------- */
+if (NEXT) {
+  $("nextText").innerHTML = "<strong>" + daysText(daysTo(NEXT.d)) + "</strong> · " + esc(NEXT.title);
+  $("nextChip").title = fmtLong(NEXT.d) + " · " + NEXT.items.join(" · ");
+} else {
+  $("nextText").textContent = "ระยะที่ 2 · ปรับโครงสร้าง (2570 – 2572)";
+}
+const dock = $("dock");
+for (const t of ALL) {
+  const b = document.createElement("button");
+  b.type = "button"; b.dataset.id = t.id; b.style.setProperty("--c", t.color);
+  b.innerHTML = '<span class="swatch"></span>' + esc(t.short);
+  b.onclick = () => goTo(t.id, true);
+  dock.append(b);
+}
+const cards = $("cards");
+for (const t of ALL) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "card"; b.style.setProperty("--c", t.color);
+  b.innerHTML = '<span class="tag"><span class="swatch"></span>' + esc(t.tag) + "</span><h3>" + esc(t.name) + "</h3><p>" + esc(t.role) + "</p>";
+  b.onclick = () => openSheet(t.id);
+  cards.append(b);
+}
+let listMode = false;
+function setList(on) {
+  listMode = on;
+  $("listView").hidden = !on;
+  $("scene").style.visibility = on ? "hidden" : "visible";
+  document.querySelector(".bottom").style.visibility = on ? "hidden" : "";
+  $("joy").hidden = on || !COARSE || !window.__has3D;
+  $("viewToggle").querySelector(".long").textContent = on ? "มุมมอง 3 มิติ" : "มุมมองรายการ"; $("viewToggle").querySelector(".short").textContent = on ? "3 มิติ" : "รายการ";
+}
+$("viewToggle").onclick = () => setList(!listMode);
+$("hint").textContent = COARSE ? "ลากจอยสติ๊กเพื่อเดิน · แตะเอเจนต์หรือปุ่มด้านล่างเพื่อเดินไปคุย" : "เดิน: WASD หรือปุ่มลูกศร · คลิกพื้นเพื่อเดินไป · คลิกเอเจนต์เพื่อคุย";
+
+let goTo = id => openSheet(id);
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("sheet").hidden) { closeSheet(); }
+});
+
+/* ---------- 3D office ---------- */
+const hasGL = typeof THREE !== "undefined" && (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl") || c.getContext("experimental-webgl")); } catch (e) { return false; } })();
+if (!hasGL) {
+  window.__has3D = false;
+  $("viewToggle").hidden = true;
+  setList(true);
+  return;
+}
+window.__has3D = true;
+
+const F_DISP = 'Prompt, "Noto Sans Thai", Loma, sans-serif';
+const F_BODY = '"IBM Plex Sans Thai", "Noto Sans Thai", Loma, sans-serif';
+const F_MONO = '"IBM Plex Mono", "IBM Plex Sans Thai", Loma, monospace';
+const THAI = /[฀-๿]/;
+
+const canvas = $("scene");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, COARSE ? 1.75 : 2));
+renderer.setClearColor(0x08122b);
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x08122b, 40, 85);
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+scene.add(new THREE.HemisphereLight(0xc6d6ff, 0x0b1430, 0.95));
+const sun = new THREE.DirectionalLight(0xffffff, 0.55); sun.position.set(8, 20, 12); scene.add(sun);
+const ANISO = renderer.capabilities.getMaxAnisotropy();
+
+const matCache = {};
+const mat = (c, o) => { const k = c + JSON.stringify(o || {}); return matCache[k] || (matCache[k] = new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.85, metalness: 0.05 }, o || {}))); };
+const basic = c => new THREE.MeshBasicMaterial({ color: c });
+function box(w, h, d, m, x, y, z) { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); scene.add(o); return o; }
+
+/* floor, grid, walls */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(46, 42), mat(0x0d1d44, { roughness: 0.95 }));
+floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, 5.65); scene.add(floor);
+{
+  const p = [];
+  for (let x = -23; x <= 23; x += 2) p.push(x, 0.012, -15.3, x, 0.012, 26.6);
+  for (let z = -15; z <= 26.6; z += 2) p.push(-23, 0.012, z, 23, 0.012, z);
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(p, 3));
+  scene.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x22397a, transparent: true, opacity: 0.55 })));
+}
+box(46, 9.6, 0.3, mat(0x0a1636), 0, 4.8, -15.4);
+box(0.3, 1, 32, mat(0x0e1c45), -23, 0.5, 0.65);
+box(0.3, 1, 32, mat(0x0e1c45), 23, 0.5, 0.65);
+box(0.32, 0.06, 32, basic(0xc8202f), -23, 1.02, 0.65);
+box(0.32, 0.06, 32, basic(0xc8202f), 23, 1.02, 0.65);
+{ // red slanted entrance stripe, after the Brady banner
+  const s = new THREE.Mesh(new THREE.PlaneGeometry(50, 1.5), basic(0xb81f2e));
+  s.rotation.x = -Math.PI / 2; s.rotation.z = 0.07; s.position.set(0, 0.02, 14.4); scene.add(s);
+}
+
+/* collision boxes */
+const BOXES = [];
+const addBox = (x0, x1, z0, z1) => BOXES.push({ x0, x1, z0, z1 });
+const B = { x0: -22.2, x1: 22.2, z0: -12.9, z1: 15.9 };
+
+/* canvas textures */
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function fit(c, text, maxW, size, weight, fam) { let s = size; for (;;) { c.font = weight + " " + s + "px " + fam; if (c.measureText(text).width <= maxW || s <= 12) return s; s -= 2; } }
+function makeTex(w, h) { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const tex = new THREE.CanvasTexture(cv); tex.anisotropy = ANISO; return { cv, tex }; }
+const boards = [];
+function statusPill(c, xr, y) {
+  const live = aiState === "live";
+  const label = live ? "AI สด" : aiState === "connecting" ? "กำลังเชื่อม" : "แผนงาน";
+  c.font = "600 26px " + F_BODY; const w = c.measureText(label).width + 62;
+  rr(c, xr - w, y, w, 46, 23); c.fillStyle = "rgba(0,0,0,.32)"; c.fill();
+  c.fillStyle = live ? "#3ccf91" : "#f2b33d"; c.beginPath(); c.arc(xr - w + 24, y + 23, 8, 0, Math.PI * 2); c.fill();
+  c.fillStyle = "#fff"; c.fillText(label, xr - w + 42, y + 32);
+}
+function drawAgentBoard(c, W, H, a) {
+  const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, mix(a.color, "#08122b", 0.55)); g.addColorStop(1, mix(a.color, "#08122b", 0.86));
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.fillStyle = "rgba(255,255,255,.025)"; for (let y = 0; y < H; y += 6) c.fillRect(0, y, W, 2);
+  c.fillStyle = a.color; c.fillRect(0, 0, W, 12);
+  c.font = "600 26px " + F_MONO; const tw = c.measureText(a.tag).width;
+  rr(c, 44, 42, tw + 36, 46, 10); c.fillStyle = "rgba(0,0,0,.3)"; c.fill(); c.fillStyle = a.color; c.fillText(a.tag, 62, 74);
+  statusPill(c, W - 44, 42);
+  c.fillStyle = "#fff"; fit(c, a.name, 480, 66, 600, F_DISP); c.fillText(a.name, 44, 168);
+  c.fillStyle = mix(a.color, "#ffffff", 0.2); fit(c, a.board.big, 470, 150, 600, F_MONO); c.fillText(a.board.big, 40, 350);
+  c.fillStyle = "#d5def5"; fit(c, a.board.bigLabel, 470, 32, 500, F_BODY); c.fillText(a.board.bigLabel, 44, 405);
+  c.fillStyle = "rgba(255,255,255,.12)"; c.fillRect(548, 140, 2, 340);
+  let y = 150; c.strokeStyle = "rgba(255,255,255,.14)"; c.lineWidth = 2;
+  for (const [k, v] of a.board.rows) {
+    c.fillStyle = "#a9b9e0"; fit(c, k, 400, 27, 500, F_BODY); c.fillText(k, 580, y + 20);
+    c.fillStyle = "#fff"; fit(c, v, 400, 42, 600, THAI.test(v) ? F_BODY : F_MONO); c.fillText(v, 580, y + 72);
+    c.beginPath(); c.moveTo(580, y + 96); c.lineTo(W - 44, y + 96); c.stroke();
+    y += 112;
+  }
+  c.fillStyle = "#a9b9e0"; fit(c, a.board.foot, W - 88, 26, 400, F_BODY); c.fillText(a.board.foot, 44, H - 40);
+}
+function drawLeader(c, W, H) {
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#13265e"); g.addColorStop(1, "#0a1636"); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.fillStyle = "#9fb8e8"; c.fillRect(0, 0, W, 12);
+  c.font = "600 26px " + F_MONO; const tw = c.measureText("LIVE TARGETS").width;
+  rr(c, 44, 42, tw + 36, 46, 10); c.fillStyle = "rgba(0,0,0,.3)"; c.fill(); c.fillStyle = "#9fb8e8"; c.fillText("LIVE TARGETS", 62, 74);
+  statusPill(c, W - 44, 42);
+  c.fillStyle = "#fff"; fit(c, "เป้าหมาย Shopee Mall", W - 88, 56, 600, F_DISP); c.fillText("เป้าหมาย Shopee Mall", 44, 158);
+  const cols = [44, 470, 690, W - 44];
+  c.fillStyle = "#a9b9e0"; c.font = "500 25px " + F_BODY;
+  c.textAlign = "left"; c.fillText("วันที่", cols[0], 214);
+  c.textAlign = "right"; c.fillText("SKU", cols[1], 214); c.fillText("ออเดอร์", cols[2], 214); c.fillText("ยอด/เดือน", cols[3], 214);
+  let y = 226;
+  for (const m of MILESTONES.filter(m => m.sku)) {
+    const hot = m === NEXT_SKU;
+    if (hot) { c.fillStyle = "rgba(226,40,59,.22)"; c.fillRect(28, y + 6, W - 56, 66); c.fillStyle = "#e2283b"; c.fillRect(28, y + 6, 6, 66); }
+    c.textAlign = "left"; c.fillStyle = "#fff"; c.font = "600 34px " + F_BODY; c.fillText(fmtShort(m.d), cols[0], y + 52);
+    c.textAlign = "right"; c.font = "600 38px " + F_MONO;
+    c.fillText(String(m.sku), cols[1], y + 52); c.fillText(String(m.orders), cols[2], y + 52); c.fillText(baht(m.sales), cols[3], y + 52);
+    y += 76;
+  }
+  c.textAlign = "left"; c.fillStyle = "#d5def5"; c.font = "500 30px " + F_BODY; c.fillText("2570 – 2572", cols[0], y + 46);
+  c.textAlign = "right"; c.fillStyle = "#fff"; c.font = "600 32px " + F_BODY; c.fillText("เกิน ฿5.4 ล้าน/ปี", cols[3], y + 46);
+  c.textAlign = "left"; c.fillStyle = "#a9b9e0"; fit(c, "ตัวเลขทั้งหมดเป็นเป้าหมาย ไม่ใช่ผลจริง · ออเดอร์เฉลี่ย ฿5,000", W - 88, 24, 400, F_BODY);
+  c.fillText("ตัวเลขทั้งหมดเป็นเป้าหมาย ไม่ใช่ผลจริง · ออเดอร์เฉลี่ย ฿5,000", 44, H - 34);
+}
+function drawIPO(c, W, H) {
+  c.fillStyle = "#eef2fb"; c.fillRect(0, 0, W, H);
+  c.fillStyle = "#1b3a9c"; c.fillRect(0, 0, W, 124);
+  c.fillStyle = "#d8283a"; c.fillRect(0, 124, W, 6);
+  c.fillStyle = "#fff"; c.font = "700 56px " + F_DISP; c.fillText("แผนงาน AMI สู่ IPO", 40, 70);
+  c.fillStyle = "#c9d6ff"; c.font = "400 24px " + F_BODY; c.fillText("AMI Asiancodingsystems GROUP · Roadmap ต.ค. 2569 – 2579", 40, 108);
+  c.textAlign = "right"; c.fillStyle = "#fff"; c.font = "500 24px " + F_BODY; c.fillText("เจ้าของแผน: " + OWNER, W - 40, 50);
+  const warn = "ตัวเลขทั้งหมดเป็น “เป้าหมาย” ไม่ใช่ผลจริง"; c.font = "600 22px " + F_BODY; const ww = c.measureText(warn).width + 32;
+  c.fillStyle = "#d8283a"; rr(c, W - 40 - ww, 66, ww, 40, 8); c.fill(); c.fillStyle = "#fff"; c.fillText(warn, W - 56, 94);
+  c.textAlign = "left";
+  const ph = [["ระยะที่ 1 · เปิด Shopee Mall และขยายยอดขายออนไลน์", 40, 1000, "#1b3a9c"], ["ระยะที่ 2 · ปรับโครงสร้าง", 1012, 1262, "#2f5fd0"], ["ระยะที่ 3 · เตรียม IPO", 1274, W - 40, "#d8283a"]];
+  for (const [label, x0, x1, col] of ph) { c.fillStyle = col; rr(c, x0, 150, x1 - x0, 48, 8); c.fill(); c.fillStyle = "#fff"; fit(c, label, x1 - x0 - 24, 24, 600, F_BODY); c.textAlign = "center"; c.fillText(label, (x0 + x1) / 2, 183); c.textAlign = "left"; }
+  const pts = [...MILESTONES.map(m => ({ date: fmtShort(m.d), short: m.short, m })), ...LATER.map(p => ({ date: p.span, short: p.short }))];
+  const x0 = 120, step = (W - 240) / (pts.length - 1), ly = 336;
+  c.fillStyle = "#14295f"; c.fillRect(60, ly - 4, W - 120, 8);
+  pts.forEach((p, i) => {
+    const x = x0 + i * step, up = i % 2 === 0;
+    const isNext = p.m && p.m === NEXT, past = p.m && daysTo(p.m.d) < 0;
+    c.strokeStyle = "#8aa0d8"; c.lineWidth = 2; c.beginPath(); c.moveTo(x, ly); c.lineTo(x, up ? ly - 46 : ly + 46); c.stroke();
+    c.beginPath(); c.arc(x, ly, isNext ? 20 : 15, 0, Math.PI * 2); c.fillStyle = isNext ? "#d8283a" : past ? "#1b3a9c" : "#fff"; c.fill();
+    c.lineWidth = 6; c.strokeStyle = "#d8283a"; c.stroke();
+    c.textAlign = "center";
+    c.fillStyle = "#c21f31"; c.font = "600 28px " + F_BODY; c.fillText(p.date, x, up ? ly - 96 : ly + 90);
+    c.fillStyle = "#14295f"; fit(c, p.short, step - 14, 22, 500, F_BODY); c.fillText(p.short, x, up ? ly - 62 : ly + 124);
+  });
+  c.textAlign = "left";
+  c.fillStyle = "#0f1f55"; c.fillRect(0, H - 90, W, 90);
+  if (NEXT) {
+    c.fillStyle = "#c9d6ff"; c.font = "500 26px " + F_BODY; c.fillText("ถัดไป", 40, H - 36);
+    c.fillStyle = "#fff"; fit(c, NEXT.title + " · " + fmtLong(NEXT.d), W - 520, 34, 600, F_BODY); c.fillText(NEXT.title + " · " + fmtLong(NEXT.d), 120, H - 34);
+    c.textAlign = "right"; c.fillStyle = "#ff6b78"; c.font = "700 46px " + F_DISP; c.fillText(daysText(daysTo(NEXT.d)), W - 40, H - 28); c.textAlign = "left";
+  } else {
+    c.fillStyle = "#fff"; c.font = "600 32px " + F_BODY; c.fillText("ระยะที่ 1 ครบทุกวันในแผน · ต่อด้วยระยะที่ 2", 40, H - 34);
+  }
+}
+function drawSign(c, W, H) {
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#071538"); g.addColorStop(1, "#0d2a63"); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.strokeStyle = "rgba(120,150,220,.28)"; c.lineWidth = 3;
+  for (let r = 60; r < 560; r += 62) { c.beginPath(); c.arc(W - 40, 70, r, Math.PI * 0.5, Math.PI * 1.02); c.stroke(); }
+  c.fillStyle = "#e2283b"; c.fillRect(W / 2 - 60, 92, 120, 10);
+  c.textAlign = "center"; c.fillStyle = "#fff"; c.font = "700 84px " + F_DISP; c.fillText("Barcode  •  RFID", W / 2, 210);
+  c.fillStyle = "#a9c0f0"; c.font = "500 46px " + F_DISP; c.fillText("Brady Official Distributor", W / 2, 284);
+  c.fillStyle = "#fff"; c.font = "italic 400 46px " + F_DISP; c.fillText("One Touch, Fit All", W / 2, 366);
+  c.save(); c.translate(0, H - 120); c.rotate(-0.07); c.fillStyle = "#b81f2e"; c.fillRect(-40, 0, W + 80, 54); c.restore();
+  c.fillStyle = "#cfdcff"; c.font = "600 28px " + F_BODY; c.fillText("ACS · Asian Coding System", W / 2, H - 22);
+  for (let i = 0, x = 60; x < 360; i++) { const w = [3, 6, 2, 4, 8, 3][i % 6]; c.fillStyle = "rgba(160,185,240,.35)"; c.fillRect(x, 420, w, 60); x += w + [3, 5, 2, 4][i % 4]; }
+  c.textAlign = "left";
+}
+function addBoard(draw, w, h, x, y, z, frameColor, target, cvW, legs) {
+  const cvH = Math.round(cvW * h / w);
+  const { cv, tex } = makeTex(cvW, cvH);
+  const frame = box(w + 0.24, h + 0.24, 0.12, basic(frameColor), x, y, z);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex }));
+  plane.position.set(x, y, z + 0.07); scene.add(plane);
+  if (legs) { const lm = mat(0x1a2a5c); box(0.12, y - h / 2, 0.12, lm, x - w / 2 + 0.5, (y - h / 2) / 2, z - 0.02); box(0.12, y - h / 2, 0.12, lm, x + w / 2 - 0.5, (y - h / 2) / 2, z - 0.02); }
+  const item = { cv, tex, draw: () => { const c = cv.getContext("2d"); c.clearRect(0, 0, cv.width, cv.height); draw(c, cv.width, cv.height); tex.needsUpdate = true; } };
+  item.draw(); boards.push(item);
+  if (target) { plane.userData.target = target; frame.userData.target = target; pickables.push(plane, frame); }
+  return item;
+}
+const pickables = [];
+
+/* name tags */
+const tags = [];
+function makeTag(text, color, scale) {
+  const { cv, tex } = makeTex(640, 120);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  const s = scale || 2.9; sp.scale.set(s, s * 120 / 640, 1);
+  const item = { draw: () => {
+    const c = cv.getContext("2d"); c.clearRect(0, 0, 640, 120);
+    fit(c, text, 640 - 130, 50, 600, F_DISP); const tw = c.measureText(text).width;
+    const w = tw + 92, h = 84, x = (640 - w) / 2, y = 18;
+    rr(c, x, y, w, h, 22); c.fillStyle = "rgba(6,12,30,.88)"; c.fill(); c.lineWidth = 5; c.strokeStyle = "rgba(255,255,255,.92)"; c.stroke();
+    c.fillStyle = color; c.beginPath(); c.arc(x + 34, 60, 11, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#fff"; c.textBaseline = "middle"; c.fillText(text, x + 56, 62); c.textBaseline = "alphabetic";
+    tex.needsUpdate = true;
+  } };
+  item.draw(); tags.push(item);
+  return sp;
+}
+
+/* figures */
+const GEO = { body: new THREE.CylinderGeometry(0.36, 0.44, 0.95, 18), head: new THREE.SphereGeometry(0.33, 20, 16), shadow: new THREE.CircleGeometry(0.55, 24) };
+const skin = mat(0xe8dccb), shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false });
+function figure(color, seated) {
+  const g = new THREE.Group();
+  const b = new THREE.Mesh(GEO.body, mat(color)); b.position.y = seated ? 0.98 : 0.6;
+  const h = new THREE.Mesh(GEO.head, skin); h.position.y = b.position.y + 0.78;
+  const s = new THREE.Mesh(GEO.shadow, shadowMat); s.rotation.x = -Math.PI / 2; s.position.y = 0.015;
+  g.add(s, b, h); g.userData = { body: b, head: h, baseY: b.position.y, headY: h.position.y };
+  scene.add(g); return g;
+}
+
+/* agent desks */
+const agentFigs = [];
+for (const a of AGENTS) {
+  const cx = a.x, cz = a.z, col = new THREE.Color(a.color);
+  const rug = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 4.9), mat(mix(a.color, "#0d1d44", 0.8)));
+  rug.rotation.x = -Math.PI / 2; rug.position.set(cx, 0.015, cz - 0.8); scene.add(rug);
+  for (const sx of [-3.1, 3.1]) { box(0.14, 0.85, 3.3, mat(0x16244d), cx + sx, 0.425, cz - 1.25); box(0.16, 0.05, 3.3, basic(col), cx + sx, 0.87, cz - 1.25); }
+  const dz = cz - 0.95, dm = mat(0x1a2650);
+  box(2.8, 0.1, 1.1, dm, cx, 0.95, dz);
+  for (const [lx, lz] of [[-1.3, -0.45], [1.3, -0.45], [-1.3, 0.45], [1.3, 0.45]]) box(0.08, 0.9, 0.08, dm, cx + lx, 0.45, dz + lz);
+  box(1.1, 0.62, 0.06, mat(0x0a0f1f), cx, 1.38, dz - 0.2);
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.52), basic(mix(a.color, "#000000", 0.35))); scr.position.set(cx, 1.38, dz - 0.165); scene.add(scr);
+  box(0.7, 0.03, 0.22, mat(0x0a0f1f), cx, 1.015, dz + 0.25);
+  box(0.72, 0.12, 0.7, mat(0x10183a), cx, 0.5, cz + 0.05); box(0.72, 0.72, 0.1, mat(0x10183a), cx, 0.86, cz + 0.5);
+  addBoard((c, W, H) => drawAgentBoard(c, W, H, a), 5.2, 3.1, cx, 2.9, cz - 2.5, mix(a.color, "#000000", 0.15), a.id, 1024, true);
+  const f = figure(mix(a.color, "#1a1a2a", 0.25), true); f.position.set(cx, 0, cz);
+  f.traverse(o => { if (o.isMesh) { o.userData.target = a.id; pickables.push(o); } });
+  const tag = makeTag(a.name, a.color); tag.position.set(cx, 2.55, cz); scene.add(tag);
+  agentFigs.push({ f, phase: Math.random() * 6 });
+  addBox(cx - 1.7, cx + 1.7, cz - 2.75, cz + 0.6);
+  for (const sx of [-3.1, 3.1]) addBox(cx + sx - 0.12, cx + sx + 0.12, cz - 2.9, cz + 0.4);
+}
+
+/* meeting room */
+{
+  const t = T.meeting, cx = 0, cz = 6;
+  const rug = new THREE.Mesh(new THREE.PlaneGeometry(8.2, 6.2), mat(mix(t.color, "#0d1d44", 0.72)));
+  rug.rotation.x = -Math.PI / 2; rug.position.set(cx, 0.015, cz); scene.add(rug);
+  const top = box(5.4, 0.12, 2.4, mat(0x6a4fe0, { emissive: 0x2a1a70, emissiveIntensity: 0.5 }), cx, 0.9, cz);
+  const lm = mat(0x1a1440);
+  for (const [lx, lz] of [[-2.4, -0.9], [2.4, -0.9], [-2.4, 0.9], [2.4, 0.9]]) box(0.1, 0.85, 0.1, lm, cx + lx, 0.43, cz + lz);
+  const seatCols = [...AGENTS.map(a => a.color), "#2f6be3"];
+  [-1.8, 0, 1.8].forEach((x, i) => {
+    box(0.7, 0.1, 0.7, mat(mix(seatCols[i], "#10183a", 0.4)), cx + x, 0.5, cz - 1.75); box(0.7, 0.7, 0.1, mat(mix(seatCols[i], "#10183a", 0.4)), cx + x, 0.85, cz - 2.1);
+    box(0.7, 0.1, 0.7, mat(mix(seatCols[i + 3], "#10183a", 0.4)), cx + x, 0.5, cz + 1.75); box(0.7, 0.7, 0.1, mat(mix(seatCols[i + 3], "#10183a", 0.4)), cx + x, 0.85, cz + 2.1);
+  });
+  top.userData.target = "meeting"; pickables.push(top);
+  const tag = makeTag("ห้องประชุม", t.color); tag.position.set(cx, 2.3, cz); scene.add(tag);
+  addBox(-3.3, 3.3, 3.8, 8.25);
+}
+
+/* back wall: leaderboard, IPO roadmap, Brady sign */
+addBoard(drawLeader, 9, 5.4, -15.5, 3.7, -14.9, 0x6f86c0, "leader", 1024, true);
+addBoard(drawIPO, 16, 6, 0, 5.0, -14.9, 0x1b3a9c, "ipo", 1536, true);
+addBoard(drawSign, 9, 5.4, 15.5, 3.7, -14.9, 0xb81f2e, null, 1024, true);
+
+/* trees */
+for (const [x, z] of [[-20.6, -12.4], [20.6, -12.4], [-20.6, 14.6], [20.6, 14.6], [-8.2, 15], [8.2, 15], [-20.6, 1], [20.6, 1]]) {
+  box(0.22, 0.6, 0.22, mat(0x5a3b22), x, 0.3, z);
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.9, 7), mat(0x2f9e6a)); cone.position.set(x, 1.5, z); scene.add(cone);
+  addBox(x - 0.45, x + 0.45, z - 0.45, z + 0.45);
+}
+
+/* player */
+const player = figure(0x2f6be3, false);
+player.scale.setScalar(1.08);
+{
+  const { cv, tex } = makeTex(256, 128); const c = cv.getContext("2d");
+  c.fillStyle = "#fff"; c.font = "700 84px " + F_DISP; c.textAlign = "center"; c.fillText("AMI", 128, 96);
+  const plate = new THREE.Mesh(new THREE.PlaneGeometry(0.56, 0.28), new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+  plate.position.set(0, 0.68, 0.43); player.add(plate);
+  boards.push({ draw: () => { c.clearRect(0, 0, 256, 128); c.fillStyle = "#fff"; c.font = "700 84px " + F_DISP; c.textAlign = "center"; c.fillText("AMI", 128, 96); tex.needsUpdate = true; } });
+}
+const ptag = makeTag("อริย์ธัช · CEO", "#2f6be3", 2.7); ptag.position.set(0, 2.25, 0); player.add(ptag);
+const P = { x: 0, z: 12.6, rot: 0 };
+player.position.set(P.x, 0, P.z);
+
+/* staff walking the aisles */
+const LX = [-18, -6, 6, 18], LZ = [-10.5, 0.5, 11];
+const node = (i, j) => ({ i, j, x: LX[i], z: LZ[j] });
+const npcs = [];
+if (!RM) for (const [i, j, col] of [[0, 1, 0x1b2440], [3, 0, 0x22283a], [1, 2, 0x1d2a4a], [2, 1, 0x262033]]) {
+  const f = figure(col, false); const n = node(i, j); f.position.set(n.x, 0, n.z);
+  npcs.push({ f, at: n, to: null, wait: Math.random() * 2, prev: null });
+}
+function nextNode(n, prev) {
+  const opts = [];
+  if (n.i > 0) opts.push(node(n.i - 1, n.j)); if (n.i < LX.length - 1) opts.push(node(n.i + 1, n.j));
+  if (n.j > 0) opts.push(node(n.i, n.j - 1)); if (n.j < LZ.length - 1) opts.push(node(n.i, n.j + 1));
+  const f = opts.filter(o => !prev || o.i !== prev.i || o.j !== prev.j);
+  const pool = f.length ? f : opts; return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/* path finding on a coarse grid */
+const R = 0.48, CELL = 0.5;
+const NX = Math.ceil((B.x1 - B.x0) / CELL), NZ = Math.ceil((B.z1 - B.z0) / CELL);
+function blocked(x, z) {
+  if (x < B.x0 || x > B.x1 || z < B.z0 || z > B.z1) return true;
+  for (const b of BOXES) if (x > b.x0 - R && x < b.x1 + R && z > b.z0 - R && z < b.z1 + R) return true;
+  return false;
+}
+const GRID = new Uint8Array(NX * NZ);
+const cx = i => B.x0 + (i + 0.5) * CELL, cz = j => B.z0 + (j + 0.5) * CELL;
+for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) GRID[j * NX + i] = blocked(cx(i), cz(j)) ? 1 : 0;
+const toCell = (x, z) => [clamp(Math.floor((x - B.x0) / CELL), 0, NX - 1), clamp(Math.floor((z - B.z0) / CELL), 0, NZ - 1)];
+function nearestFree(i, j) {
+  if (!GRID[j * NX + i]) return [i, j];
+  for (let r = 1; r < 12; r++) for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) {
+    const a = i + di, b = j + dj; if (a >= 0 && b >= 0 && a < NX && b < NZ && !GRID[b * NX + a]) return [a, b];
+  }
+  return [i, j];
+}
+function los(ax, az, bx, bz) {
+  const d = Math.hypot(bx - ax, bz - az), n = Math.ceil(d / 0.2);
+  for (let k = 1; k <= n; k++) { const t = k / n; if (blocked(ax + (bx - ax) * t, az + (bz - az) * t)) return false; }
+  return true;
+}
+function findPath(fx, fz, tx, tz) {
+  if (los(fx, fz, tx, tz)) return [{ x: tx, z: tz }];
+  const [si, sj] = nearestFree(...toCell(fx, fz)), [ei, ej] = nearestFree(...toCell(tx, tz));
+  const N = NX * NZ, g = new Float32Array(N).fill(Infinity), from = new Int32Array(N).fill(-1), closed = new Uint8Array(N);
+  const heap = [], push = (k, f) => { heap.push([f, k]); let i = heap.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
+  const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return top; };
+  const h = (i, j) => { const dx = Math.abs(i - ei), dz = Math.abs(j - ej); return Math.max(dx, dz) + 0.414 * Math.min(dx, dz); };
+  const s = sj * NX + si, e = ej * NX + ei; g[s] = 0; push(s, h(si, sj));
+  while (heap.length) {
+    const [, k] = pop(); if (closed[k]) continue; closed[k] = 1; if (k === e) break;
+    const i = k % NX, j = (k / NX) | 0;
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+      if (!di && !dj) continue; const a = i + di, b = j + dj;
+      if (a < 0 || b < 0 || a >= NX || b >= NZ || GRID[b * NX + a]) continue;
+      if (di && dj && (GRID[j * NX + a] || GRID[b * NX + i])) continue;
+      const nk = b * NX + a, ng = g[k] + (di && dj ? 1.414 : 1);
+      if (ng < g[nk]) { g[nk] = ng; from[nk] = k; push(nk, ng + h(a, b)); }
+    }
+  }
+  if (from[e] === -1 && e !== s) return [{ x: tx, z: tz }];
+  const cells = []; for (let k = e; k !== -1; k = from[k]) cells.push({ x: cx(k % NX), z: cz((k / NX) | 0) });
+  cells.reverse(); cells.push({ x: tx, z: tz });
+  const out = []; let ax = fx, az = fz, idx = 0;
+  while (idx < cells.length) {
+    let far = idx; for (let k = cells.length - 1; k > idx; k--) if (los(ax, az, cells[k].x, cells[k].z)) { far = k; break; }
+    out.push(cells[far]); ax = cells[far].x; az = cells[far].z; idx = far + 1;
+  }
+  return out;
+}
+
+/* movement + input */
+const keys = new Set();
+let auto = null, joyV = { x: 0, z: 0 }, moved = false, zoom = 1;
+function walkTo(x, z, open) { auto = { path: findPath(P.x, P.z, x, z), open }; }
+goTo = (id, open) => {
+  const t = T[id]; if (!t) return;
+  if (listMode) { openSheet(id); return; }
+  if (Math.hypot(P.x - t.spot.x, P.z - t.spot.z) < 0.6) { if (open) openSheet(id); return; }
+  walkTo(t.spot.x, t.spot.z, open ? id : null);
+};
+const typing = e => /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+document.addEventListener("keydown", e => {
+  if (typing(e) || e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) { keys.add(k); auto = null; if (k.startsWith("arrow")) e.preventDefault(); }
+  if ((k === "e" || (k === "enter" && e.target === canvas)) && near) { e.preventDefault(); openSheet(near); }
+});
+document.addEventListener("keyup", e => keys.delete(e.key.toLowerCase()));
+window.addEventListener("blur", () => keys.clear());
+
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane0 = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const pointers = new Map(); let down = null, pinch0 = 0, zoom0 = 1;
+canvas.addEventListener("pointerdown", e => {
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pointers.size === 1) down = { x: e.clientX, y: e.clientY, t: performance.now() };
+  if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); zoom0 = zoom; down = null; }
+});
+canvas.addEventListener("pointermove", e => {
+  if (!pointers.has(e.pointerId)) return; pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pointers.size === 2 && pinch0) { const [a, b] = [...pointers.values()]; zoom = clamp(zoom0 * pinch0 / Math.max(40, Math.hypot(a.x - b.x, a.y - b.y)), 0.6, 1.7); }
+});
+const endPointer = e => {
+  pointers.delete(e.pointerId); if (pointers.size < 2) pinch0 = 0;
+  if (!down || e.type === "pointercancel") { down = null; return; }
+  const d = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t; down = null;
+  if (d > 10 || dt > 700) return;
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  if (hit && hit.object.userData.target) { goTo(hit.object.userData.target, true); return; }
+  const pt = new THREE.Vector3(); if (ray.ray.intersectPlane(plane0, pt)) { const [i, j] = nearestFree(...toCell(pt.x, pt.z)); walkTo(cx(i), cz(j), null); }
+};
+canvas.addEventListener("pointerup", endPointer);
+canvas.addEventListener("pointercancel", endPointer);
+canvas.addEventListener("wheel", e => { e.preventDefault(); zoom = clamp(zoom * (1 + e.deltaY * 0.0012), 0.6, 1.7); }, { passive: false });
+
+if (COARSE) {
+  const joy = $("joy"), knob = joy.querySelector(".knob"); joy.hidden = false;
+  let jid = null;
+  const setJ = e => { const r = joy.getBoundingClientRect(); let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2); const m = Math.hypot(dx, dy), lim = 40; if (m > lim) { dx *= lim / m; dy *= lim / m; } knob.style.transform = "translate(" + dx + "px," + dy + "px)"; joyV = { x: dx / lim, z: dy / lim }; if (m > 6) auto = null; };
+  joy.addEventListener("pointerdown", e => { jid = e.pointerId; joy.setPointerCapture(jid); setJ(e); });
+  joy.addEventListener("pointermove", e => { if (e.pointerId === jid) setJ(e); });
+  const rel = e => { if (e.pointerId !== jid) return; jid = null; joyV = { x: 0, z: 0 }; knob.style.transform = ""; };
+  joy.addEventListener("pointerup", rel); joy.addEventListener("pointercancel", rel);
+}
+
+function collide(p) {
+  for (let pass = 0; pass < 2; pass++) for (const b of BOXES) {
+    const qx = clamp(p.x, b.x0, b.x1), qz = clamp(p.z, b.z0, b.z1), dx = p.x - qx, dz = p.z - qz, d2 = dx * dx + dz * dz;
+    if (d2 >= R * R) continue;
+    if (d2 > 1e-8) { const d = Math.sqrt(d2); p.x = qx + dx / d * R; p.z = qz + dz / d * R; }
+    else { const o = [[p.x - b.x0 + R, -1, 0], [b.x1 - p.x + R, 1, 0], [p.z - b.z0 + R, 0, -1], [b.z1 - p.z + R, 0, 1]].sort((a, c) => a[0] - c[0])[0]; p.x += o[1] * o[0]; p.z += o[2] * o[0]; }
+  }
+  p.x = clamp(p.x, B.x0, B.x1); p.z = clamp(p.z, B.z0, B.z1);
+}
+
+/* camera + layout */
+let viewW = 1, viewH = 1;
+function layout() {
+  viewW = window.innerWidth; viewH = window.innerHeight;
+  renderer.setSize(viewW, viewH, false);
+  camera.aspect = viewW / viewH;
+  const sh = $("sheet");
+  if (!sh.hidden) {
+    const r = sh.getBoundingClientRect();
+    if (viewW > 720) camera.setViewOffset(viewW, viewH, r.width / 2, 0, viewW, viewH);
+    else camera.setViewOffset(viewW, viewH, 0, r.height / 2, viewW, viewH);
+  } else camera.clearViewOffset();
+  camera.fov = camera.aspect < 0.8 ? 50 : 42;
+  camera.updateProjectionMatrix();
+}
+window.__layout = () => requestAnimationFrame(layout);
+window.addEventListener("resize", layout);
+layout();
+const camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
+function camGoal() {
+  const k = zoom * (camera.aspect < 0.8 ? 1.5 : camera.aspect < 1.2 ? 1.25 : 1.12);
+  return [new THREE.Vector3(P.x * 0.86, 15 * k, P.z + 11.5 * k), new THREE.Vector3(P.x * 0.92, 0.5, P.z - 4)];
+}
+{ const [p, l] = camGoal(); camPos.copy(p); camLook.copy(l); camera.position.copy(p); camera.lookAt(l); }
+
+/* proximity */
+let near = null;
+function updateNear() {
+  let best = null, bd = 2.5;
+  for (const t of ALL) { const d = Math.hypot(P.x - t.spot.x, P.z - t.spot.z); if (d < bd) { bd = d; best = t.id; } }
+  if (best === near) return;
+  near = best;
+  const btn = $("talkBtn");
+  syncTalk();
+  dock.querySelectorAll("button").forEach(b => b.classList.toggle("near", b.dataset.id === near));
+  if (near) { const t = T[near]; btn.style.setProperty("--c", t.color); $("talkText").textContent = t.talk; $("talkKey").hidden = COARSE; }
+}
+$("talkBtn").onclick = () => { if (near) openSheet(near); };
+window.__syncTalk = syncTalk;
+function syncTalk() { $("talkBtn").hidden = !near || near === current; }
+
+/* fonts: draw once with fallbacks, again when the web fonts arrive */
+const redrawAll = () => { boards.forEach(b => b.draw()); tags.forEach(t => t.draw()); };
+window.__redrawBoards = redrawAll;
+if (document.fonts && document.fonts.load) {
+  const specs = ["600 40px Prompt", "700 40px Prompt", "italic 400 40px Prompt", "500 30px \"IBM Plex Sans Thai\"", "600 30px \"IBM Plex Sans Thai\"", "600 40px \"IBM Plex Mono\""];
+  Promise.race([Promise.all(specs.map(f => document.fonts.load(f, "กขค ABC 123 ฿").catch(() => null))), new Promise(r => setTimeout(r, 4000))]).then(redrawAll);
+}
+
+/* loop */
+let last = performance.now();
+const SPEED = 6;
+function tick(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000;
+  let vx = 0, vz = 0;
+  if (keys.has("a") || keys.has("arrowleft")) vx -= 1; if (keys.has("d") || keys.has("arrowright")) vx += 1;
+  if (keys.has("w") || keys.has("arrowup")) vz -= 1; if (keys.has("s") || keys.has("arrowdown")) vz += 1;
+  vx += joyV.x; vz += joyV.z;
+  let m = Math.hypot(vx, vz);
+  if (m > 0.08) { if (m > 1) { vx /= m; vz /= m; m = 1; } vx *= SPEED; vz *= SPEED; }
+  else if (auto && auto.path.length) {
+    const w = auto.path[0], dx = w.x - P.x, dz = w.z - P.z, d = Math.hypot(dx, dz);
+    if (d < 0.18) { auto.path.shift(); if (!auto.path.length) { const open = auto.open; auto = null; if (open) { const tt = T[open]; P.rot = Math.atan2(-(tt.x !== undefined ? tt.x - P.x : 0), -((tt.z !== undefined ? tt.z : tt.spot.z - 3) - P.z)); openSheet(open); } } vx = vz = 0; }
+    else { const s = Math.min(SPEED, d / dt); vx = dx / d * s; vz = dz / d * s; }
+  } else { vx = vz = 0; }
+  const sp = Math.hypot(vx, vz);
+  if (sp > 0.01) {
+    const p = { x: P.x + vx * dt, z: P.z + vz * dt }; collide(p); P.x = p.x; P.z = p.z;
+    const target = Math.atan2(-vx, -vz); let dr = target - P.rot; dr = Math.atan2(Math.sin(dr), Math.cos(dr)); P.rot += dr * Math.min(1, dt * 12);
+    if (!moved) { moved = true; $("hint").hidden = true; }
+  }
+  player.position.set(P.x, 0, P.z); player.rotation.y = P.rot;
+  const pb = player.userData; pb.body.position.y = pb.baseY + (sp > 0.5 && !RM ? Math.abs(Math.sin(t * 11)) * 0.06 : 0); pb.head.position.y = pb.body.position.y + 0.78;
+  if (!RM) for (const a of agentFigs) { const u = a.f.userData; u.head.position.y = u.headY + Math.sin(t * 2 + a.phase) * 0.025; u.body.rotation.z = Math.sin(t * 3.1 + a.phase) * 0.025; }
+  for (const n of npcs) {
+    if (n.wait > 0) { n.wait -= dt; continue; }
+    if (!n.to) n.to = nextNode(n.at, n.prev);
+    const dx = n.to.x - n.f.position.x, dz = n.to.z - n.f.position.z, d = Math.hypot(dx, dz);
+    if (d < 0.05) { n.prev = n.at; n.at = n.to; n.to = null; n.wait = Math.random() < 0.4 ? 1 + Math.random() * 2.5 : 0; continue; }
+    const s = Math.min(1.5 * dt, d); n.f.position.x += dx / d * s; n.f.position.z += dz / d * s; n.f.rotation.y = Math.atan2(-dx, -dz);
+    n.f.userData.body.position.y = n.f.userData.baseY + Math.abs(Math.sin(t * 8)) * 0.04; n.f.userData.head.position.y = n.f.userData.body.position.y + 0.78;
+  }
+  const [gp, gl] = camGoal(); const k = 1 - Math.exp(-dt * 5);
+  camPos.lerp(gp, k); camLook.lerp(gl, k); camera.position.copy(camPos); camera.lookAt(camLook);
+  updateNear();
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
