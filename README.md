@@ -9,7 +9,7 @@ Static website and project showcase for CreativEX2026, including the Kamakaben T
 - `kamakaben-scent-passport.html` - Kamakaben scent passport prototype
 - `downloads/kamakaben-project-link-map.html` - Kamakaben project link map
 - `downloads/kamakaben-global-brand-profile.pdf` - Kamakaben global brand profile
-- `ami-agent-office.html` - AMI Agent Office: walkable 3D office of AI agents for the ACS Shopee Mall launch and the AMI IPO roadmap
+- `ami-agent-office.html` - AMI Agent Office: walkable 3D office whose nodes and drafts grow on the AMI IPO calendar, including while the page is closed
 
 ## GitHub Pages
 
