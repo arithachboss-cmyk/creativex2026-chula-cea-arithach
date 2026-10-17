@@ -185,6 +185,33 @@ td.num { font-family: var(--mono); }
 @media (min-width: 721px) {
   body.sheet-open #hud { padding-right: calc(min(440px, 100vw - 24px) + 28px); }
 }
+.ticker { margin: 0; min-height: 1.35em; font-size: 13px; color: #d5def5; text-align: center; text-wrap: balance; }
+#growthChip .dot { background: var(--ok); }
+#growthChip.live .dot { box-shadow: 0 0 0 3px rgba(60, 207, 145, .22); }
+#growthChip .beat { color: var(--muted); font-size: 12px; }
+#growthChip .beat::before { content: "·"; margin: 0 6px; }
+.meter { height: 8px; background: #08122b; border-radius: 99px; overflow: hidden; }
+.meter > span { display: block; height: 100%; background: var(--red); }
+.meter.thin { height: 4px; margin: 0 0 6px; }
+.node-card { background: var(--panel-2); border-radius: 12px; padding: 10px 12px; }
+.node-card.locked { opacity: .72; }
+.node-card header { display: flex; gap: 8px; align-items: flex-start; }
+.node-card header > div { flex: 1; min-width: 0; }
+.node-card h3 { margin: 0; font: 600 15px/1.35 var(--display); }
+.node-card header p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+.node-card header .state, .task-row .state { margin-left: auto; font: 500 11.5px var(--mono); color: var(--muted); white-space: nowrap; }
+.task-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.task-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--line); }
+.task-name { background: none; border: 0; padding: 0; text-align: left; font-weight: 600; color: #fff; }
+.task-body { padding: 2px 0 8px; }
+.work-banner { display: block; width: min(1080px, 100%); margin: 0 auto 12px; text-align: left; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); color: inherit; padding: 16px; cursor: pointer; }
+.work-banner:hover { background: var(--panel-2); }
+.work-banner .tag { font: 600 11px var(--mono); letter-spacing: .14em; color: var(--red); display: flex; gap: 8px; align-items: center; }
+.work-banner h3 { margin: 4px 0; font: 600 18px var(--display); }
+.work-banner p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+@media (max-width: 720px) {
+  #beat { display: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .thinking::after { animation: none; }
 }
@@ -199,12 +226,14 @@ td.num { font-family: var(--mono); }
       <div class="mark" aria-hidden="true"></div>
       <div>
         <h1>AMI Agent Office</h1>
-        <p>AMI Asiancodingsystems GROUP · เอเจนต์ 5 ตัวทำงานตามแผนสู่ IPO</p>
+        <p id="brandSub">AMI Asiancodingsystems GROUP · สำนักงานโตตามแผนสู่ IPO</p>
       </div>
     </div>
     <div class="status">
+      <span class="chip glass live" id="growthChip" title="สำนักงานเดินตามปฏิทินแผน"><span class="dot"></span><span id="growthText">กำลังเปิดสำนักงาน</span><span class="beat" id="beat"></span></span>
       <span class="chip glass" id="nextChip"><span class="dot"></span><span id="nextText">กำลังคำนวณ…</span></span>
       <span class="chip glass ai" id="aiChip"><span class="dot"></span><span class="long" id="aiText">กำลังเชื่อม AI…</span><span class="short" id="aiShort">กำลังเชื่อม</span></span>
+      <button class="chip glass" id="workBtn" type="button"><span class="long">งานสำนักงาน</span><span class="short">งาน</span></button>
       <button class="chip glass" id="viewToggle" type="button"><span class="long">มุมมองรายการ</span><span class="short">รายการ</span></button>
     </div>
   </div>
@@ -212,6 +241,7 @@ td.num { font-family: var(--mono); }
   <div style="flex:1"></div>
   <div class="bottom">
     <button id="talkBtn" type="button" hidden><span class="bubble" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg></span><span id="talkText">คุย</span><kbd id="talkKey">E</kbd></button>
+    <p class="ticker" id="ticker" aria-live="polite"></p>
     <p class="hint" id="hint"></p>
     <nav class="dock glass" id="dock" aria-label="เดินไปหาเอเจนต์"></nav>
   </div>
@@ -220,6 +250,7 @@ td.num { font-family: var(--mono); }
 <div id="joy" hidden aria-hidden="true"><div class="knob"></div></div>
 
 <section id="listView" hidden aria-label="รายการเอเจนต์">
+  <button type="button" id="workBanner" class="work-banner"></button>
   <div class="cards" id="cards"></div>
 </section>
 
@@ -451,6 +482,757 @@ for (const a of AGENTS) { a.spot = { x: a.x, z: a.z + 1.75 }; a.talk = "คุ�
 const ALL = [...AGENTS, ...SPECIALS];
 const T = Object.fromEntries(ALL.map(t => [t.id, t]));
 
+/* ---------- Living office: nodes and drafts grow on the IPO calendar ---------- */
+const OFFICE_KEY = "ami-office-growth-v1";
+const WORK_MS_DEFAULT = 8000;
+let workMs = WORK_MS_DEFAULT;
+let clockOverride = null;
+const dayNow = () => clockOverride || isoDay(new Date());
+function isoDay(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function blankState() {
+  return { v: 1, done: {}, acked: {}, doing: null, pulses: [], pulseDropped: 0, lastBeat: 0 };
+}
+let office = blankState();
+let openTask = null;
+let officeTimer = 0;
+let beatPaint = 0;
+
+const NODES = [
+  { id: "mall-file", name: "เอกสาร Shopee Mall", agent: "risk", phase: 1, unlock: "2026-10-17", pos: { x: -15, z: 10.6 },
+    blurb: "ชุดเอกสารบริษัทและสิทธิ์ Seller Center ก่อนวันส่ง 22 ต.ค. 2569",
+    tasks: [
+      { id: "mall-file-1", date: "2026-10-17", title: "รายการเอกสารก่อนยื่น Shopee Mall", body: `**รายการที่คุณ Chutima ใช้ส่ง 22 ต.ค. 2569**
+ให้ทีมติ๊กจากเอกสารจริง เอเจนต์ไม่ยืนยันว่าส่งแล้ว
+
+- หนังสือรับรองบริษัท อายุไม่เกินที่ Shopee กำหนดตอนยื่น
+- ภ.พ.20 หรือเอกสารภาษีที่หน้าร้าน Mall ขอ
+- สำเนาบัตรผู้มีอำนาจลงนาม
+- บัญชีธนาคารในชื่อบริษัท
+- ที่อยู่ตรงกับเอกสารจดทะเบียน
+
+ขั้นต่อไป: วางเอกสารจริงข้างรายการนี้ แล้วติ๊กเฉพาะฉบับที่มีในมือ` },
+      { id: "mall-file-2", date: "2026-10-19", title: "สิทธิ์ Seller Center", body: `**สิทธิ์ที่แผนระบุว่าคุณอริย์ธัชเป็นผู้ให้**
+- บัญชี Seller Center ของร้าน ACS ต้องเข้าได้ก่อนส่งเอกสาร
+- ผู้รับสิทธิ์อย่างน้อยสองคน: คนส่งเอกสาร และคนลงสินค้า
+- เก็บชื่อผู้ใช้ไว้ในที่ที่ทีมเปิดได้ ห้ามวางรหัสในแชทนี้
+
+ขั้นต่อไป: ทดลองเข้า Seller Center วันนี้ ถ้าเข้าไม่ได้ ให้แก้ก่อน 22 ต.ค.` },
+      { id: "mall-file-3", date: "2026-10-21", title: "มอบหมายวันส่ง 22 ต.ค.", body: `**ใบมอบหมายหนึ่งหน้า**
+- ผู้ส่ง: คุณ Chutima
+- ส่งภายใน: 22 ต.ค. 2569
+- ส่งอะไร: ชุดเอกสารจากรายการ 17 ต.ค.
+- ผู้ให้สิทธิ์ Seller Center: คุณอริย์ธัช
+- รายงานกลับในวันเดียวกันว่า ส่งแล้ว หรือขาดฉบับไหน
+
+ขั้นต่อไป: ส่งใบมอบหมายนี้ให้คุณ Chutima วันนี้` },
+    ] },
+  { id: "news-watch", name: "จังหวะข่าวและแคมเปญ", agent: "news", phase: 1, unlock: "2026-10-17", pos: { x: -9, z: 10.6 },
+    blurb: "เฝ้าแคมเปญ Shopee และข่าวโรงงาน แล้วเทียบกับวันในแผน",
+    tasks: [
+      { id: "news-1", date: "2026-10-17", title: "ห้าหัวข้อที่เฝ้า", body: `**เฝ้าห้าหัวข้อนี้จนจบระยะที่ 1**
+1. วันแคมเปญ 11.11, 12.12 และ 1.1 ใน Seller Center (อย่าใช้ความจำแทนวันจริง)
+2. ข่าวโรงงานใหม่ใน EEC และนิคมที่ต้องใช้ฉลากหรือ RFID
+3. ประกาศ BOI ที่เกี่ยวกับอิเล็กทรอนิกส์ คลังสินค้า โรงพยาบาล
+4. กฎ Shopee Mall ที่เปลี่ยนระหว่างยื่น
+5. คู่แข่ง Brady รายอื่นที่เปิดร้าน Mall
+
+ขั้นต่อไป: ตั้งชื่อคนอ่านข่าวแต่ละหัวข้อ เอเจนต์เปิดเว็บเองไม่ได้` },
+      { id: "news-2", date: "2026-11-02", title: "เทียบ 11.11 กับวันลงสินค้า", body: `**11.11 มาก่อนวันลง 30 รายการ (14 พ.ย.)**
+- ร้านยังไม่มีสินค้าครบ 30 รายการในแคมเปญนี้
+- ยอดเดือนแรกตามแผนจึงพึ่งลูกค้าเดิมของ ACS ไม่พึ่งทราฟฟิกแคมเปญ
+- ถ้า Seller Center เลื่อนวันแคมเปญ ให้แก้สมมติฐานนี้
+
+ขั้นต่อไป: เปิด Seller Center แล้วจดวัน 11.11 จริงไว้ข้างข้อนี้` },
+      { id: "news-3", date: "2026-11-20", title: "เทียบ 12.12 กับวันอนุมัติ Mall", body: `**12.12 มาก่อนวันที่แผนตั้งให้อนุมัติ Mall (14 ธ.ค.)**
+- ใช้ช่วงนี้เก็บรีวิวจากร้านปกติ
+- อย่าตั้งโปรแรงที่ต้องใช้ตรา Mall ถ้ายังไม่ได้รับอนุมัติ
+- สินค้าที่ตั้งใจไว้รอบ 80 รายการ ยังไม่ต้องครบก่อน 12.12
+
+ขั้นต่อไป: เลือกสินค้า 10 รายการที่มีของจริง สำหรับเก็บรีวิวช่วง 12.12` },
+      { id: "news-4", date: "2026-12-20", title: "เทียบแคมเปญต้นเดือนมกราคม", body: `**แคมเปญต้น ม.ค. 2570 เป็นรอบแรกที่แผนอยากให้ร้านเป็น Mall แล้ว**
+- เป้าเดือนนั้นคือ 90 ออเดอร์ และ 450,000 บาท ซึ่งยังเป็นเป้าหมาย
+- โปรโมชันต้องไม่ดึงออเดอร์เฉลี่ยต่ำกว่า 5,000 บาท โดยไม่ตั้งใจ
+- ตรวจวันแคมเปญจริงใน Seller Center อีกครั้งปลาย ธ.ค.
+
+ขั้นต่อไป: ร่างโปรที่ใช้กับชุดเครื่องพิมพ์ ไม่ใช่ฉลากชิ้นถูกอย่างเดียว` },
+    ] },
+  { id: "whale-base", name: "ฐานลูกค้าประจำ", agent: "buyer", phase: 1, unlock: "2026-10-17", pos: { x: -3, z: 10.6 },
+    blurb: "ลูกค้าองค์กรที่ซื้อซ้ำ คือทางไปเป้า 90 ออเดอร์ใน ม.ค. 2570",
+    tasks: [
+      { id: "whale-1", date: "2026-10-18", title: "สี่กลุ่มลูกค้าองค์กร", body: `**จัดลูกค้าเดิมเข้าสี่กลุ่มนี้**
+1. โรงงานผลิต — ฉลากเครื่องจักร ป้ายความปลอดภัย Lockout/Tagout — ผู้ซื้อมักเป็น จป. หรือซ่อมบำรุง
+2. ผู้รับเหมาไฟฟ้าและดาต้าเซ็นเตอร์ — ฉลากสายไฟ — ผู้ซื้อมักเป็นวิศวกรโครงการ
+3. คลังสินค้า — บาร์โค้ด RFID ฉลากชั้นวาง — ผู้ซื้อมักเป็นผู้จัดการคลัง
+4. โรงพยาบาลและแล็บ — ฉลากหลอดและฉลากทนสารเคมี — ผู้ซื้อมักเป็นจัดซื้อ
+
+ขั้นต่อไป: ใส่ชื่อลูกค้าจริงอย่างน้อยกลุ่มละ 3 รายจากบิลย้อนหลัง` },
+      { id: "whale-2", date: "2026-11-06", title: "เลือกลูกค้าเดิม 20 ราย", body: `**เกณฑ์คัด 20 รายแรก หลังมีของพร้อมลง**
+- ซื้อซ้ำในปีนี้
+- สินค้าที่ซื้ออยู่ใน 30 รายการแรก หรือสั่งแทนด้วยรุ่นที่ Procurement ยืนยันแล้ว
+- มียอดต่อครั้งใกล้หรือเกิน 5,000 บาท
+- ติดต่อทาง LINE ได้
+
+รายชื่อจริงยังไม่มีในสำนักงานนี้ ช่องนี้ไว้ให้ทีมเติม
+
+ขั้นต่อไป: ดึงรายงานขายซ้ำ แล้วตัดให้เหลือ 20 รายตามเกณฑ์` },
+      { id: "whale-3", date: "2026-11-12", title: "ข้อความ LINE หลังลงสินค้า", body: `**ส่งได้หลังลงสินค้าจริงเท่านั้น ไม่ส่งก่อน 14 พ.ย. ถ้าของยังไม่ขึ้น**
+
+> สวัสดีค่ะ/ครับ คุณ[ชื่อลูกค้า] จาก ACS สินค้า Brady ที่ใช้อยู่สั่งผ่าน Shopee ได้แล้ว ค้น "[ชื่อร้าน]" สั่งได้ตลอดและตามพัสดุในแอป ถ้าต้องการใบเสนอราคาหรือจำนวนมาก ทักช่องทางเดิมได้เลย
+
+- แนบลิงก์สินค้าที่ลูกค้ารายนั้นเคยซื้อ 2 รายการ
+- ไม่สัญญาเรื่องของแถมที่ Seller Center ยังไม่ได้ตั้ง
+
+ขั้นต่อไป: ส่งให้ 20 รายที่คัดไว้ หลังตรวจว่าหน้าร้านเปิดแล้ว` },
+      { id: "whale-4", date: "2026-12-01", title: "สมมติฐานลูกค้าประจำสามสิบราย", body: `**สมมติฐาน ไม่ใช่จำนวนลูกค้าจริง**
+เป้า ม.ค. 2570 คือ 90 ออเดอร์ต่อเดือน ถ้าหนึ่งรายสั่งราว 3 ครั้งต่อเดือน ต้องมีลูกค้าประจำประมาณ 30 ราย
+
+ตอนนี้สำนักงานยังไม่มีรายชื่อจริง จึงยังนับ 30 ไม่ได้
+
+ขั้นต่อไป: นับจากรายชื่อจริงว่ามีลูกค้าซื้อซ้ำครบ 30 หรือยังขาดอีกกี่ราย` },
+    ] },
+  { id: "property-prep", name: "เอเจนต์อสังหา", agent: "property", phase: 1, unlock: "2026-10-17", pos: { x: 3, z: 10.6 },
+    blurb: "เตรียมประกาศและคัดลีดของ Middle Property ก่อนเข้าโครงโฮลดิ้งในระยะที่ 2",
+    tasks: [
+      { id: "prop-1", date: "2026-10-18", title: "โครงประกาศขายและเช่า", body: `**โครงประกาศ ห้ามเติมข้อมูลที่เจ้าของทรัพย์ไม่ได้ให้**
+- หัวข้อ: ประเภท ทำเล จุดขายหนึ่งข้อ ราคา
+- ข้อมูลหลัก: ขนาด ห้อง ทิศ ที่จอด
+- ทำเล: ระยะถึงรถไฟฟ้าหรือถนนหลัก
+- จุดเด่นสามข้อจากของจริง
+- ปิดท้าย: วันนัดดูและช่องทางติดต่อ
+- ช่องที่ไม่มีข้อมูลให้เขียน [ช่องว่าง]
+
+ขั้นต่อไป: เอาประกาศแรกหนึ่งหลังมาวางในโครงนี้` },
+      { id: "prop-2", date: "2026-11-16", title: "ห้าคำถามคัดลีด", body: `**ถามทุกแชทที่ทักจากประกาศ**
+1. งบซื้อ หรือค่าเช่าต่อเดือน
+2. ทำเลที่ต้องการ
+3. อยู่เองหรือลงทุน
+4. สถานะกู้
+5. อยากเข้าอยู่เมื่อไหร่
+
+ลีดที่ตอบข้อ 1, 4 และ 5 ได้ชัด คือลีดร้อน
+
+ขั้นต่อไป: ตั้งห้าข้อนี้เป็นข้อความแรกในทุกช่องทางที่ลงประกาศ` },
+      { id: "prop-3", date: "2026-12-16", title: "เกณฑ์นัดดูภายใน 48 ชั่วโมง", body: `**กติกาปฏิบัติของ Middle Property**
+- ลีดร้อนได้นัดดูภายใน 48 ชั่วโมง
+- ลีดที่ยังไม่บอกงบ ตอบคำถามซ้ำหนึ่งครั้ง แล้วพักไว้
+- ไม่สัญญาผลตอบแทนค่าเช่า
+- สัญญาและภาษีให้ที่ปรึกษาตรวจ เอเจนต์ไม่สรุปข้อกฎหมาย
+
+ขั้นต่อไป: เลือกคนหนึ่งคนที่รับนัดลีดร้อนได้ใน 48 ชั่วโมง` },
+      { id: "prop-4", date: "2027-02-01", title: "บทบาทในโฮลดิ้ง", body: `**ระยะที่ 2 ระบุ Middle Property เป็นบริษัทลูกที่โฮลดิ้งต้องถือหุ้น**
+งานนี้ยังไม่ใช่การโอนหุ้น
+- ใครถือหุ้น Middle Property วันนี้
+- กี่เปอร์เซ็นต์ที่แผนอยากให้โฮลดิ้งถือ
+- มีข้อจำกัดในผู้ถือหุ้นเดิมหรือไม่
+- ข้อกฎหมายให้ทนายตอบ สำนักงานนี้เก็บเฉพาะคำถาม
+
+ขั้นต่อไป: ขอตารางผู้ถือหุ้นจริงจากฝ่ายบัญชี แล้ววางข้างคำถามนี้` },
+    ] },
+  { id: "stock-confirm", name: "ยืนยันสต็อก 30 รายการ", agent: "hunter", phase: 1, unlock: "2026-10-22", pos: { x: 9, z: 10.6 },
+    blurb: "Procurement ACS ยืนยันของ ราคา และระยะส่ง ภายใน 31 ต.ค. 2569",
+    tasks: [
+      { id: "stock-1", date: "2026-10-22", title: "โครง 30 SKU หกกลุ่ม", body: `**โครงให้ Procurement เติมรุ่นที่มีของจริง รวม 30 พอดี**
+1. เครื่องพิมพ์ฉลากพกพา 6 รายการ — ตัวอย่าง Brady BMP21-PLUS, M211, M611 ต้องยืนยันของก่อน
+2. ฉลากและเทปของเครื่องกลุ่มแรก 10 รายการ — ของใช้ซ้ำ
+3. เครื่องพิมพ์อุตสาหกรรม 3 รายการ — ตัวอย่างตระกูล i5300, i7100
+4. ป้ายความปลอดภัยและ Lockout/Tagout 6 รายการ
+5. ปลอกและฉลากสายไฟ 3 รายการ
+6. ชุดเริ่มต้น เครื่องพร้อมเทป 2 ชุด
+
+รวม 30 RFID เก็บไว้รอบ 80 รายการใน ธ.ค.
+
+ขั้นต่อไป: Procurement ใส่รหัสรุ่นจริงในแต่ละช่อง ภายใน 31 ต.ค.` },
+      { id: "stock-2", date: "2026-10-26", title: "แบบฟอร์มยืนยันสต็อก", body: `**หนึ่งแถวต่อหนึ่ง SKU ให้ Procurement เติม**
+- กลุ่มสินค้า
+- รหัสรุ่น
+- จำนวนในคลังวันนี้
+- ราคาขายที่เสนอ
+- ระยะเวลาสั่งเพิ่มถ้าของต่ำกว่า 5 ชิ้น
+- ผู้ยืนยันและวันที่
+
+ไม่มีแถวไหนให้เอเจนต์เดาตัวเลข
+
+ขั้นต่อไป: ส่งแบบฟอร์มนี้ให้ Procurement ACS วันนี้` },
+      { id: "stock-3", date: "2026-10-30", title: "เช็กลิสต์เส้นตาย 31 ต.ค.", body: `**ก่อนสิ้นวัน 31 ต.ค. 2569 ต้องมีครบสามอย่าง**
+- 30 แถวที่ผู้ยืนยันลงชื่อ
+- แถวที่ของเป็นศูนย์ถูกแทนด้วยรุ่นสำรองในกลุ่มเดียวกัน
+- ราคาในแบบฟอร์มพร้อมให้ล่าสินค้าใช้เขียนหน้าร้าน
+
+ถ้าไม่ครบ 30 แถว ยังไม่เลื่อนไปลงสินค้า
+
+ขั้นต่อไป: นับแถวที่ลงชื่อแล้ว แล้วรายงานจำนวนที่ยังขาด` },
+    ] },
+  { id: "launch-30", name: "ลงสินค้าและยื่น Mall", agent: "hunter", phase: 1, unlock: "2026-11-01", pos: { x: 15, z: 10.6 },
+    blurb: "ลง 30 รายการ แล้วยื่น Shopee Mall ภายใน 14 พ.ย. 2569 เป้า 10 ออเดอร์ / 50,000 บาท",
+    tasks: [
+      { id: "launch-1", date: "2026-11-01", title: "ลำดับลง 30 รายการ", body: `**ลำดับลงของที่มีใบยืนยันสต็อกแล้วเท่านั้น**
+1. สองชุดเริ่มต้น ลงก่อน เพราะดันออเดอร์เฉลี่ย
+2. เครื่องพิมพ์พกพา
+3. เทปของเครื่องนั้น
+4. ป้ายความปลอดภัย
+5. ที่เหลือ
+
+เป้าเดือนนี้เป็นเป้าหมาย: 10 ออเดอร์ และ 50,000 บาท ออเดอร์เฉลี่ย 5,000 บาท
+
+ขั้นต่อไป: ลงวันละไม่เกิน 10 รายการ แล้วตรวจรูปกับราคาในวันเดียวกัน` },
+      { id: "launch-2", date: "2026-11-05", title: "สูตรชื่อสินค้า Shopee", body: `**สูตรชื่อ**
+[แบรนด์] [รุ่น] [ประเภท] [ใช้กับงานอะไร] | ของแท้ ตัวแทนจำหน่ายอย่างเป็นทางการ
+
+ตัวอย่างโครง: Brady [รุ่น] เครื่องพิมพ์ฉลากพกพา พิมพ์ฉลากสายไฟ | ของแท้ ตัวแทนจำหน่ายอย่างเป็นทางการ
+
+คำอธิบายห้าบรรทัด: งานที่ใช้, เทปที่ใส่ได้, สเปกสามข้อ, ของในกล่อง, การรับประกันจาก ACS
+สเปกที่ไม่แน่ให้เขียน [ใส่สเปก] ไม่ให้เดา
+
+ขั้นต่อไป: เขียนชื่อจริงจากรหัสรุ่นในแบบฟอร์ม 31 ต.ค.` },
+      { id: "launch-3", date: "2026-11-09", title: "ชุดเริ่มต้นดันออเดอร์เฉลี่ย", body: `**สองชุดที่อยู่ในโครง 30 SKU**
+แต่ละชุดคือเครื่องหนึ่งเครื่องบวกเทปที่ใช้ด้วยกัน ไม่แยกขายเป็นชิ้นถูกในลิงก์เดียวกัน
+ราคาชุดต้องมาจากแบบฟอร์ม Procurement
+เป้าออเดอร์เฉลี่ย 5,000 บาทจะไม่ถึงถ้าหน้าร้านมีแต่ฉลากม้วนเล็ก
+
+ขั้นต่อไป: ตั้งชื่อชุดให้บอกว่ามีเครื่องและเทปอะไร โดยใช้รุ่นที่ยืนยันแล้ว` },
+      { id: "launch-4", date: "2026-11-13", title: "เช็กลิสต์ยื่น Shopee Mall", body: `**ยื่นภายใน 14 พ.ย. 2569**
+- เอกสารที่ส่ง 22 ต.ค. ครบตามที่ร้านตอบกลับ
+- สินค้าอย่างน้อย 30 รายการที่ของไม่เป็นศูนย์
+- ชื่อร้านและที่อยู่ตรงกับหนังสือรับรอง
+- คนที่ยื่นมีสิทธิ์ Seller Center
+
+การยื่นไม่เท่ากับอนุมัติ วันอนุมัติในแผนคือ 14 ธ.ค.
+
+ขั้นต่อไป: กดยื่นเมื่อครบสี่ข้อ แล้วเก็บเลขคำขอ` },
+    ] },
+  { id: "mall-80", name: "Mall อนุมัติและ 80 รายการ", agent: "risk", phase: 1, unlock: "2026-11-14", pos: { x: -15, z: 13.2 },
+    blurb: "จาก 30 ไป 80 รายการ เป้า 40 ออเดอร์ / 200,000 บาท และตรวจผู้ถือหุ้น ภายใน 14 ธ.ค.",
+    tasks: [
+      { id: "m80-1", date: "2026-11-14", title: "ช่อง SKU จาก 30 ไป 80", body: `**ขาดอีก 50 รายการก่อน 14 ธ.ค.**
+ลำดับที่ควรเติม
+- เทปและฉลากของเครื่องที่ขายไปแล้วในรอบแรก
+- RFID ที่เลื่อนไว้จากรอบ 30
+- ป้ายความปลอดภัยเพิ่มในกลุ่มที่สต็อกผ่านแล้ว
+- เครื่องพิมพ์อุตสาหกรรมที่ใบยืนยันรอบแรกยังไม่ใส่
+
+ทุกตัวต้องมีใบยืนยันสต็อกรอบใหม่ ห้ามคัดลอกชื่อจากโฆษณาอย่างเดียว
+
+ขั้นต่อไป: เปิดใบ 50 แถวให้ Procurement เติมภายใน 7 ธ.ค.` },
+      { id: "m80-2", date: "2026-11-28", title: "เก็บรีวิวก่อน 12.12", body: `**12.12 มาก่อนวันอนุมัติ Mall**
+- ขอรีวิวจากออเดอร์จริงของร้านปกติเท่านั้น
+- ไม่ซื้อรีวิว
+- สินค้าที่ยังไม่ส่ง ไม่ขอรีวิว
+
+ขั้นต่อไป: ลิสต์เลขออเดอร์ที่ส่งแล้ว และยังไม่มีรีวิว` },
+      { id: "m80-3", date: "2026-12-07", title: "ตรวจโครงสร้างผู้ถือหุ้น", body: `**แผนขอให้ตรวจโครงสร้างผู้ถือหุ้นกลุ่มให้เสร็จในรอบ 14 ธ.ค.**
+คำถามที่ต้องมีคำตอบจากเอกสารจริง
+- ใครถือ ACS วันนี้ กี่หุ้น
+- มีบริษัทอื่นในกลุ่มที่ปนกับร้านออนไลน์หรือไม่
+- ชื่อผู้ถือหุ้นตรงกับเอกสารที่จะใช้ระยะที่ 2 หรือไม่
+
+เอเจนต์ไม่ใช่นักกฎหมาย ผลตรวจต้องมาจากเอกสารบริษัท
+
+ขั้นต่อไป: ขอสำเนารายชื่อผู้ถือหุ้นล่าสุดหนึ่งชุด` },
+      { id: "m80-4", date: "2026-12-13", title: "เช็กลิสต์วันอนุมัติ", body: `**14 ธ.ค. 2569 ในแผนมีสี่เรื่องพร้อมกัน**
+- สถานะ Mall จาก Seller Center: อนุมัติแล้ว หรือยังไม่อนุมัติ
+- สินค้าครบ 80 รายการที่ของมี
+- เป้า 40 ออเดอร์และ 200,000 บาทต่อเดือน ยังเป็นเป้าหมาย
+- ผลตรวจผู้ถือหุ้นมีเอกสารแล้ว
+
+อย่าบันทึกยอดขายจริงเท่ากับเป้า
+
+ขั้นต่อไป: เปิด Seller Center เช้า 14 ธ.ค. แล้วจดสถานะคำขอ Mall` },
+    ] },
+  { id: "scale-150", name: "150 รายการและผู้สอบบัญชี", agent: "hunter", phase: 1, unlock: "2026-12-14", pos: { x: -9, z: 13.2 },
+    blurb: "150 รายการ เป้า 90 ออเดอร์ / 450,000 บาท และเริ่มเรื่องผู้สอบบัญชีที่ ก.ล.ต. รับรอง",
+    tasks: [
+      { id: "s150-1", date: "2026-12-14", title: "ช่อง SKU จาก 80 ไป 150", body: `**ขาดอีก 70 รายการก่อน 13 ม.ค. 2570**
+เติมจากของใช้ซ้ำของรุ่นที่ขายออกแล้วก่อน แล้วค่อยรุ่นใหม่
+แต่ละแถวยังต้องมีจำนวนในคลังและราคาจาก Procurement
+
+ขั้นต่อไป: แบ่ง 70 แถวเป็นสองชุด ส่ง Procurement ชุดละหนึ่งสัปดาห์` },
+      { id: "s150-2", date: "2026-12-28", title: "เส้น 90 ออเดอร์", body: `**เป้าหมาย ม.ค. 2570: 90 ออเดอร์ และ 450,000 บาท**
+90 × 5,000 = 450,000 ดังนั้นออเดอร์เฉลี่ยยังเป็น 5,000 บาท
+5.4 ล้านบาทต่อปีในระยะที่ 2 = 450,000 × 12 ซึ่งเป็นเป้าหมายรายได้ ไม่ใช่กำไร
+
+ขั้นต่อไป: แยกออเดอร์จริงที่มีเครื่องหรือชุดสินค้า ออกจากออเดอร์ฉลากม้วนเล็ก แล้วดูว่าค่าเฉลี่ยขยับทางไหน` },
+      { id: "s150-3", date: "2027-01-06", title: "คำถามก่อนเปลี่ยนผู้สอบบัญชี", body: `**แผนเริ่มเปลี่ยนผู้สอบบัญชีที่ ก.ล.ต. รับรองในรอบ 13 ม.ค. 2570**
+คำถามถึงฝ่ายบัญชีและที่ปรึกษา ไม่ใช่คำตอบของเอเจนต์
+- ผู้สอบบัญชีปัจจุบันคือใคร และอยู่ในบัญชีที่ ก.ล.ต. รับรองหรือไม่
+- รอบบัญชีที่จะเปลี่ยนได้โดยไม่ทิ้งช่องว่างของงบคือรอบไหน
+- ค่าสอบและระยะเวลารับงาน
+- งบกี่ปีย้อนหลังที่ผู้สอบรายใหม่ยอมรับ
+
+ขั้นต่อไป: นัดฝ่ายบัญชีตอบสี่ข้อนี้ก่อน 13 ม.ค.` },
+      { id: "s150-4", date: "2027-01-12", title: "ปิดระยะที่ 1", body: `**วันก่อนเส้น 13 ม.ค. 2570 ให้ทีมกรอกของจริงข้างเป้าหมาย**
+- จำนวน SKU ที่ขึ้นร้านจริง: [กรอก] เป้าหมาย 150
+- ออเดอร์เดือนล่าสุด: [กรอก] เป้าหมาย 90
+- ยอดเดือนล่าสุด: [กรอก] เป้าหมาย 450,000 บาท
+- สถานะ Mall: [กรอก]
+- มีจดหมายเริ่มเรื่องผู้สอบบัญชีหรือยัง: [กรอก]
+
+ขั้นต่อไป: เก็บแถวที่ยังเป็นช่องว่างไว้เป็นงานแรกของระยะที่ 2` },
+    ] },
+  { id: "holdco", name: "โครงสร้างโฮลดิ้ง", agent: "risk", phase: 2, unlock: "2027-01-14", pos: { x: -3, z: 13.2 },
+    blurb: "โฮลดิ้งถือบริษัทลูกครบ และแต่งตั้งกรรมการอิสระ ระหว่าง 2570–2572",
+    tasks: [
+      { id: "hold-1", date: "2027-01-14", title: "แผนที่บริษัทลูกหกแห่ง", body: `**บริษัทที่แผนระบุว่าโฮลดิ้งต้องถือ**
+1. ACS
+2. โฆษณา
+3. ซอฟต์แวร์
+4. วิศวกรรม
+5. Middle Property
+6. สำนักงานกฎหมาย — แผนระบุว่ายังรอความเห็นกฎหมาย
+
+แต่ละแถวให้กรอก: มีนิติบุคคลแล้วหรือยัง, ผู้ถือหุ้นวันนี้, เปอร์เซ็นต์ที่โฮลดิ้งถือ
+
+ขั้นต่อไป: เติมแถวจากหนังสือรับรอง ไม่ใช่จากความจำ` },
+      { id: "hold-2", date: "2027-04-01", title: "สำนักงานกฎหมายที่รอความเห็น", body: `**ยังไม่ใส่สำนักงานกฎหมายเข้าโฮลดิ้งจนกว่าจะมีความเห็นทนาย**
+คำถามที่ส่งให้ทนาย
+- ถือหุ้นสำนักงานกฎหมายได้หรือไม่ ภายใต้กฎวิชาชีพ
+- ถ้าไม่ได้ แผนข้อนี้ต้องตัดหรือเปลี่ยนรูปแบบอย่างไร
+- มีผลต่อโครงสร้างที่จะใช้ยื่นตลาดหรือไม่
+
+ขั้นต่อไป: ส่งสามข้อนี้เป็นหนังสือถึงทนาย แล้วเก็บคำตอบเป็นเอกสาร` },
+      { id: "hold-3", date: "2027-10-01", title: "รายการโอนหุ้นที่ยังเปิด", body: `**ตารางค้างโอน**
+หนึ่งแถวต่อหนึ่งบริษัทลูก: จำนวนหุ้นที่ยังไม่โอน, ผู้ถือเดิม, เงื่อนไขที่ยังไม่ครบ, วันที่นัดโอน
+
+แถวที่โอนครบให้ย้ายออกจากตารางนี้
+
+ขั้นต่อไป: อัปเดตตารางจากสมุดทะเบียนผู้ถือหุ้นไตรมาสนี้` },
+      { id: "hold-4", date: "2028-07-01", title: "คำถามเรื่องกรรมการอิสระ", body: `**แผนระยะที่ 2 มีการแต่งตั้งกรรมการอิสระ**
+เอเจนต์ไม่กำหนดว่าใครผ่านคุณสมบัติ
+- จำนวนที่ข้อบังคับและกฎหมายบริษัทต้องการ
+- คนที่เสนอชื่อ ไม่ใช่ผู้ถือหุ้นรายใหญ่หรือผู้บริหารในกลุ่ม
+- ความเห็นที่ปรึกษากฎหมายต่อรายชื่อ
+
+ขั้นต่อไป: ขอรายชื่อผู้สมัครจากคณะกรรมการ แล้วส่งให้ที่ปรึกษาตรวจคุณสมบัติ` },
+      { id: "hold-5", date: "2029-10-01", title: "สรุปโครงสร้างก่อนจบ 2572", body: `**ก่อนปิดระยะ 2570–2572 ให้เหลือเอกสารสี่ชุด**
+- ตารางผู้ถือหุ้นบริษัทลูกทุกแห่ง
+- ความเห็นทนายเรื่องสำนักงานกฎหมาย
+- หลักฐานการแต่งตั้งกรรมการอิสระ หรือรายการที่ยังค้าง
+- รายการที่ยังไม่ตรงกับแผน พร้อมเจ้าของงาน
+
+ขั้นต่อไป: เรียกสี่ชุดนี้เข้าห้องประชุมครั้งถัดไป` },
+    ] },
+  { id: "sales-track", name: "เส้นยอด 5.4 ล้าน", agent: "buyer", phase: 2, unlock: "2027-01-14", pos: { x: 3, z: 13.2 },
+    blurb: "ยอดขายออนไลน์ ACS เป้าหมายเกิน 5.4 ล้านบาทต่อปี เป็นรายได้ ไม่ใช่กำไร",
+    tasks: [
+      { id: "sales-1", date: "2027-01-14", title: "นิยามเส้น 5.4 ล้าน", body: `**เป้าหมายระยะที่ 2: ยอดขายออนไลน์ ACS เกิน 5.4 ล้านบาทต่อปี**
+5.4 ล้าน = 450,000 × 12 จากเป้าเดือน ม.ค. 2570
+ตัวเลขนี้คือยอดขาย ไม่ใช่กำไรสุทธิ
+เกณฑ์ mai ในระยะที่ 3 ใช้กำไร ห้ามเอายอดขายไปแทน
+
+ขั้นต่อไป: ตั้งช่องกรอกยอดออนไลน์รายเดือนแยกจากยอดขายช่องทางอื่น` },
+      { id: "sales-2", date: "2027-07-01", title: "จุดตรวจกลางปี 2570", body: `**กรอกจากรายงานขายจริง**
+- ยอดออนไลน์ครึ่งปี: [กรอก]
+- เส้นครึ่งปีของเป้าหมายทั้งปี 5.4 ล้าน คือ 2.7 ล้าน ซึ่งเป็นแค่ไม้บรรทัด ไม่ใช่ผล
+- ออเดอร์เฉลี่ยครึ่งปี: [กรอก]
+- สัดส่วนออเดอร์ที่มีเครื่องหรือชุดสินค้า: [กรอก]
+
+ขั้นต่อไป: ถ้าเฉลี่ยต่ำกว่า 5,000 ให้ดูส่วนผสมสินค้า ไม่ใช่การเพิ่มจำนวนออเดอร์อย่างเดียว` },
+      { id: "sales-3", date: "2028-07-01", title: "จุดตรวจกลางปี 2571", body: `**กรอกจากรายงานขายจริงของปี 2571**
+- ยอดออนไลน์สะสมถึงกลางปี: [กรอก]
+- เทียบไม้บรรทัด 2.7 ล้าน: สูงกว่า หรือต่ำกว่า
+- ลูกค้าประจำที่สั่งอย่างน้อยสามครั้งในหกเดือน: [กรอก] เป้าหมายสมมติฐานเดิมคือราว 30 ราย
+
+ขั้นต่อไป: เขียนชื่อกลุ่มลูกค้าที่หายไปจากสี่กลุ่ม` },
+      { id: "sales-4", date: "2029-07-01", title: "จุดตรวจก่อนปิดระยะที่ 2", body: `**ก่อนจบปี 2572**
+- ยอดออนไลน์สิบสองเดือนล่าสุด: [กรอก] เป้าหมายเกิน 5.4 ล้าน
+- ถ้ายังไม่ถึง ให้เขียนช่องว่างเป็นเงิน ไม่ต้องแต่งตัวเลข
+- กำไรยังไม่ถูกถามในงานนี้ กำไรอยู่ที่ชุดงบของระยะที่ 3
+
+ขั้นต่อไป: แนบรายงานขายสิบสองเดือนกับตารางนี้` },
+    ] },
+  { id: "audit-years", name: "งบตรวจสอบสามปี", agent: "risk", phase: 3, unlock: "2033-01-01", pos: { x: 9, z: 13.2 },
+    blurb: "งบการเงินตรวจสอบต่อเนื่องสามปี ก่อนแปรสภาพและยื่น mai",
+    tasks: [
+      { id: "aud-1", date: "2033-01-01", title: "เริ่มปีตรวจปีที่ 1", body: `**ระยะที่ 3 เริ่มนับงบตรวจสอบต่อเนื่อง**
+- ปีบัญชีปีที่ 1: [กรอกปี]
+- ผู้สอบบัญชีอยู่ในรายที่ ก.ล.ต. รับรองหรือไม่: [กรอก]
+- วันที่รับงาน: [กรอก]
+- ช่องว่างของรอบบัญชีที่หลุด: [กรอก]
+
+เอเจนต์ไม่รับรองงบ
+
+ขั้นต่อไป: เก็บหนังสือตอบรับงานของผู้สอบบัญชี` },
+      { id: "aud-2", date: "2034-01-01", title: "งบปีที่ 2 ต่อเนื่องจากปีแรก", body: `**ปีที่ 2 ต้องต่อเนื่อง**
+- ผู้สอบเป็นรายเดิมหรือเปลี่ยน: [กรอก]
+- ถ้ายเปลี่ยน เหตุผลและช่วงรอบที่ขาด: [กรอก]
+- งบปีแรกปิดลงนามแล้วหรือยัง: [กรอก]
+
+ขั้นต่อไป: วางงบปีแรกที่ลงนามแล้วคู่กับสัญญางบปีสอง` },
+      { id: "aud-3", date: "2035-01-01", title: "ครบสามปีต่อเนื่อง", body: `**เช็คสามปีเรียงกัน**
+- ปีที่ 1, 2, 3 มีงบที่ผู้สอบลงนามครบหรือไม่
+- มีปีที่เปลี่ยนผู้สอบจนงบไม่ต่อกันหรือไม่
+- ยังไม่ใช้คำว่าพร้อมยื่น จนกว่าที่ปรึกษาจะตรวจ
+
+ขั้นต่อไป: ส่งชุดสามปีให้ที่ปรึกษาการเงินหนึ่งชุด` },
+      { id: "aud-4", date: "2035-06-01", title: "คำถามแปรสภาพบริษัทมหาชน", body: `**แผนมีขั้นแปรสภาพเป็นบริษัทมหาชน**
+คำถามถึงที่ปรึกษากฎหมาย
+- ต้องแก้ข้อบังคับข้อใด
+- ผู้ถือหุ้นต้องประชุมเรื่องใด
+- ลำดับที่ถูกคือแปรสภาพก่อนยื่น หรือตามที่กฎหมายตอนนั้นกำหนด
+
+ขั้นต่อไป: นัดที่ปรึกษากฎหมายตอบสามข้อนี้เป็นหนังสือ` },
+    ] },
+  { id: "mai-file", name: "ยื่นจดทะเบียน mai", agent: "risk", phase: 3, unlock: "2035-10-01", pos: { x: 15, z: 13.2 },
+    blurb: "เกณฑ์กำไรและเช็กลิสต์ก่อนยื่น ต้องตรวจเกณฑ์ SET ล่าสุดอีกครั้ง",
+    tasks: [
+      { id: "mai-1", date: "2035-10-01", title: "ช่องเกณฑ์กำไร mai", body: `**เกณฑ์ที่แผนอ้างตอนจัดทำ ต.ค. 2569**
+- กำไรสุทธิรวม 2–3 ปี ไม่ต่ำกว่า 40 ล้านบาท
+- ปีล่าสุดไม่ต่ำกว่า 25 ล้านบาท
+แผนเตือนว่าเกณฑ์ mai ถ้าจะขึ้น SET ต้องตรวจเกณฑ์ล่าสุดก่อนยื่น ช่วง 2570–2579 ไม่ได้วาดตามสเกลเวลา
+
+กรอกจากงบที่ตรวจแล้วเท่านั้น
+- กำไรสุทธิแต่ละปี: [กรอก]
+- รวม: [กรอก]
+- เกณฑ์บนเว็บ SET ณ วันตรวจ: [กรอก URL และวันที่เปิด]
+
+ขั้นต่อไป: เปิดหน้าเกณฑ์ mai บนเว็บ SET แล้ววางลิงก์กับวันที่ที่เปิด` },
+      { id: "mai-2", date: "2036-01-13", title: "เช็กลิสต์ก่อนยื่น", body: `**ยังไม่ยื่นถ้าข้อใดเป็นช่องว่าง**
+- งบตรวจสอบต่อเนื่องครบสามปี
+- แปรสภาพบริษัทมหาชนตามความเห็นทนาย
+- กำไรเทียบเกณฑ์ SET ฉบับที่เปิดวันยื่น ไม่ใช่ฉบับในปี 2569
+- โครงสร้างผู้ถือหุ้นตรงกับเอกสารที่ยื่น
+- ที่ปรึกษาการเงินลงชื่อในเช็กลิสต์นี้
+
+ขั้นต่อไป: ให้ที่ปรึกษาการเงินเซ็นว่าข้อไหนยังไม่ผ่าน` },
+    ] },
+  { id: "maintain", name: "รักษาจังหวะหลังแผน", agent: "risk", phase: 4, unlock: "2036-04-01", pos: { x: 0, z: 14.35 },
+    blurb: "หลังเช็กลิสต์ยื่น mai สำนักงานยังร่างเช็กลิสต์ทุกไตรมาสต่อไป",
+    tasks: [] },
+];
+
+function quarterTasks(today) {
+  const out = [];
+  let y = 2036, q = 2;
+  for (let i = 0; i < 80; i++) {
+    const month = q === 1 ? 1 : q === 2 ? 4 : q === 3 ? 7 : 10;
+    const date = y + "-" + String(month).padStart(2, "0") + "-01";
+    if (date > addIso(today, 100)) break;
+    const label = "Q" + q + " " + (y + 543);
+    out.push({
+      id: "keep-" + date, date, title: "เช็กลิสต์รักษาจังหวะ " + label,
+      body: `**เช็กลิสต์ไตรมาส ${label}** ตัวเลขให้ทีมกรอกจากบัญชี
+- ยอดขายออนไลน์ ACS ไตรมาสนี้: [กรอก]
+- กำไรสุทธิกลุ่ม: [กรอก]
+- ผู้สอบบัญชียังเป็นรายที่ ก.ล.ต. รับรองหรือไม่: [กรอก]
+- เกณฑ์ mai หรือ SET เปลี่ยนจากไตรมาสก่อนหรือไม่: เปิดเว็บ SET แล้วจดวันที่
+- บริษัทลูกในแผนหกแห่งยังตรงกับผู้ถือหุ้นจริงหรือไม่
+
+ขั้นต่อไป: เก็บรายงานไตรมาสนี้ไว้คู่กับเช็กลิสต์ ห้ามใส่เป้าหมายแทนผลจริง`,
+    });
+    q += 1;
+    if (q > 4) { q = 1; y += 1; }
+  }
+  return out;
+}
+function addIso(iso, days) {
+  const d = ymd(iso);
+  d.setDate(d.getDate() + days);
+  return isoDay(d);
+}
+function nodeTasks(node, today) {
+  const list = node.id === "maintain" ? quarterTasks(today) : node.tasks;
+  return list.map(t => ({ ...t, nodeId: node.id, agent: node.agent, node: node.name, unlock: node.unlock }));
+}
+function allTasks(today) {
+  today = today || dayNow();
+  const out = [];
+  for (const n of NODES) out.push(...nodeTasks(n, today));
+  return out;
+}
+function taskById(id, today) {
+  return allTasks(today).find(t => t.id === id) || null;
+}
+
+function loadOffice() {
+  try {
+    const raw = localStorage.getItem(OFFICE_KEY);
+    if (!raw) return blankState();
+    const p = JSON.parse(raw);
+    if (!p || p.v !== 1 || typeof p.done !== "object") return blankState();
+    p.acked = p.acked || {};
+    p.pulses = Array.isArray(p.pulses) ? p.pulses : [];
+    p.pulseDropped = p.pulseDropped || 0;
+    return p;
+  } catch (e) {
+    return blankState();
+  }
+}
+function saveOffice() {
+  try { localStorage.setItem(OFFICE_KEY, JSON.stringify(office)); } catch (e) { /* private mode: memory only */ }
+}
+function addPulse(task, today) {
+  const day = task.date < today ? task.date : today;
+  let row = office.pulses.find(p => p.date === day);
+  if (!row) { row = { date: day, titles: [] }; office.pulses.push(row); }
+  if (!row.titles.includes(task.title)) row.titles.push(task.title);
+  office.pulses.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  if (office.pulses.length > 14) {
+    const drop = office.pulses.length - 14;
+    office.pulses = office.pulses.slice(drop);
+    office.pulseDropped += drop;
+  }
+}
+function reconcile() {
+  const today = dayNow();
+  const tasks = allTasks(today);
+  let changed = false;
+  for (const t of tasks) {
+    if (t.date < today && t.unlock <= t.date && !office.done[t.id]) {
+      office.done[t.id] = t.date + "T17:00:00";
+      addPulse(t, today);
+      changed = true;
+    }
+  }
+  if (office.doing) {
+    const live = taskById(office.doing.id, today);
+    if (!live || office.done[live.id] || live.date > today) { office.doing = null; changed = true; }
+    else if (Date.now() - office.doing.since >= workMs) {
+      office.done[live.id] = new Date().toISOString();
+      addPulse(live, today);
+      office.doing = null;
+      changed = true;
+    }
+  }
+  if (!office.doing) {
+    const next = tasks
+      .filter(t => t.date === today && t.unlock <= today && !office.done[t.id])
+      .sort((a, b) => a.id < b.id ? -1 : 1)[0];
+    if (next) { office.doing = { id: next.id, since: Date.now() }; changed = true; }
+  }
+  if (changed) saveOffice();
+  return changed;
+}
+
+function growthDigest() {
+  const today = dayNow();
+  const openNodes = NODES.filter(n => n.unlock <= today);
+  const tasks = allTasks(today);
+  const ready = tasks.filter(t => office.done[t.id]).length;
+  const doing = office.doing ? taskById(office.doing.id, today) : null;
+  const upcoming = tasks.filter(t => t.date > today).sort((a, b) => a.date < b.date ? -1 : 1)[0];
+  const nextNode = NODES.filter(n => n.unlock > today).sort((a, b) => a.unlock < b.unlock ? -1 : 1)[0];
+  const lines = [
+    "สถานะสำนักงาน (ร่างของเอเจนต์ ตามปฏิทินแผน ไม่ใช่ผลจริง):",
+    "- โหนดที่เปิดแล้ว " + openNodes.length + " จาก " + NODES.length,
+    "- ร่างพร้อม " + ready + " รายการ",
+  ];
+  if (doing) lines.push("- กำลังร่าง: " + doing.title + " (" + (T[doing.agent] ? T[doing.agent].name : doing.agent) + ")");
+  else if (upcoming) lines.push("- ร่างถัดไป " + fmtLong(ymd(upcoming.date)) + ": " + upcoming.title);
+  if (nextNode) lines.push("- โหนดถัดไป: " + nextNode.name + " วันที่ " + fmtLong(ymd(nextNode.unlock)));
+  return lines.join("\n");
+}
+
+function lampPayload() {
+  const today = dayNow();
+  return NODES.filter(n => n.pos && n.unlock <= today).map(n => {
+    const tasks = nodeTasks(n, today);
+    const hot = !!(office.doing && tasks.some(t => t.id === office.doing.id));
+    return { id: n.id, x: n.pos.x, z: n.pos.z, color: (T[n.agent] || {}).color || "#e2283b", hot };
+  });
+}
+function officeSignature() {
+  const today = dayNow();
+  const tasks = allTasks(today);
+  const ready = tasks.filter(t => office.done[t.id]).length;
+  const nodes = NODES.filter(n => n.unlock <= today).length;
+  return today + "|" + nodes + "|" + ready + "|" + (office.doing ? office.doing.id : "") + "|" + openTask + "|" + Object.keys(office.acked).length;
+}
+
+let paintedSig = "";
+function renderOffice(force) {
+  const sig = officeSignature();
+  if (!force && sig === paintedSig) {
+    paintDoingBar();
+    return;
+  }
+  paintedSig = sig;
+  const today = dayNow();
+  const tasks = allTasks(today);
+  const openNodes = NODES.filter(n => n.unlock <= today);
+  const ready = tasks.filter(t => office.done[t.id]).length;
+  const due = tasks.filter(t => t.date <= today && t.unlock <= today).length;
+  const doing = office.doing ? taskById(office.doing.id, today) : null;
+  const sub = $("brandSub");
+  if (sub) sub.textContent = "โหนด " + openNodes.length + " · ร่างพร้อม " + ready + " · โตตามแผนสู่ IPO";
+  const gt = $("growthText");
+  if (gt) gt.textContent = "โหนด " + openNodes.length + " · ร่าง " + ready;
+  const chip = $("growthChip");
+  if (chip) {
+    chip.classList.add("live");
+    chip.title = doing ? "กำลังร่าง: " + doing.title : "สำนักงานเดินตามปฏิทินแผน";
+  }
+  const ticker = $("ticker");
+  if (ticker) {
+    if (doing) ticker.innerHTML = "<strong>" + esc(T[doing.agent].name) + "</strong> กำลังร่าง · " + esc(doing.title);
+    else {
+      const upcoming = tasks.filter(t => t.date > today).sort((a, b) => a.date < b.date ? -1 : 1)[0];
+      ticker.textContent = upcoming
+        ? "ร่างของวันนี้ครบแล้ว · ถัดไป " + fmtLong(ymd(upcoming.date)) + " · " + upcoming.title
+        : "ร่างตามแผนครบถึงวันนี้แล้ว · ไตรมาสถัดไปจะเปิดเอง";
+    }
+  }
+  paintBanner(openNodes.length, ready, due);
+  if (current === "work") {
+    const sc = $("sheetBody").scrollTop;
+    paintWork();
+    $("sheetBody").scrollTop = sc;
+  }
+  if (window.__syncLamps) window.__syncLamps(lampPayload());
+  paintDoingBar();
+}
+function paintDoingBar() {
+  const bar = document.querySelector("[data-doing]");
+  if (!bar || !office.doing) return;
+  const pct = Math.max(4, Math.min(100, (Date.now() - office.doing.since) / workMs * 100));
+  bar.style.width = pct + "%";
+}
+function paintBanner(nodes, ready, due) {
+  const el = $("workBanner");
+  if (!el) return;
+  el.innerHTML = "<span class=\"tag\"><span class=\"swatch\"></span>OFFICE GROWTH</span><h3>สำนักงานทำงานตามปฏิทิน</h3><p>เปิดโหนด " + nodes + " · ร่างพร้อม " + ready + " จาก " + due + " งานที่ถึงวันแล้ว ปิดหน้าไว้แล้วกลับมา งานของวันที่ผ่านไปจะถูกร่างไว้ให้</p>";
+}
+function paintWork() {
+  const today = dayNow();
+  const tasks = allTasks(today);
+  const openNodes = NODES.filter(n => n.unlock <= today).length;
+  const ready = tasks.filter(t => office.done[t.id]).length;
+  const due = Math.max(1, tasks.filter(t => t.date <= today && t.unlock <= today).length);
+  const pct = Math.round(ready / due * 100);
+  const phases = [
+    [1, "ระยะที่ 1 · เปิด Shopee Mall", "ต.ค. 2569 – ม.ค. 2570"],
+    [2, "ระยะที่ 2 · ปรับโครงสร้าง", "2570 – 2572"],
+    [3, "ระยะที่ 3 · เตรียม IPO", "2576 – 2579"],
+    [4, "หลังแผน · รักษาจังหวะ", "ไตรมาสละหนึ่งเช็กลิสต์"],
+  ];
+  let html = "<p class=\"role\">เอเจนต์ร่างงานตามวันในแผน เครื่องหมาย «ร่างพร้อม» แปลว่าร่างอยู่แล้ว ไม่ใช่หลักฐานว่าคนทำเรื่องนั้นในโลกจริง</p>" +
+    "<p><span class=\"pill warn\">ตัวเลขทั้งหมดเป็น \"เป้าหมาย\" ไม่ใช่ผลจริง</span></p>" +
+    "<div class=\"meter\" aria-hidden=\"true\"><span style=\"width:" + pct + "%\"></span></div>" +
+    "<p class=\"foot\">โหนดเปิด " + openNodes + " จาก " + NODES.length + " · ร่างพร้อม " + ready + " จาก " + due + " งานที่ถึงกำหนด</p>";
+  for (const [pid, name, span] of phases) {
+    const group = NODES.filter(n => n.phase === pid);
+    if (!group.length) continue;
+    html += "<p class=\"phase\">" + esc(name) + "<small>" + esc(span) + "</small></p>";
+    for (const n of group) {
+      const unlocked = n.unlock <= today;
+      const list = nodeTasks(n, today);
+      const agent = T[n.agent];
+      html += "<article class=\"node-card" + (unlocked ? "" : " locked") + "\">" +
+        "<header><span class=\"swatch\" style=\"background:" + agent.color + "\"></span><div><h3>" + esc(n.name) + "</h3><p>" + esc(agent.name) + " · " + esc(n.blurb) + "</p></div>" +
+        "<span class=\"state\">" + (unlocked ? "เปิดแล้ว" : "เปิด " + esc(fmtLong(ymd(n.unlock)))) + "</span></header>";
+      if (!unlocked) { html += "</article>"; continue; }
+      html += "<ul class=\"task-list\">";
+      for (const t of list) {
+        const drafted = !!office.done[t.id];
+        const doing = office.doing && office.doing.id === t.id;
+        const future = t.date > today;
+        const state = doing ? "กำลังร่าง" : drafted ? (office.acked[t.id] ? "รับทราบแล้ว" : "ร่างพร้อม") : future ? "รอวัน" : "รอคิว";
+        html += "<li><div class=\"task-row\"><span class=\"when\">" + esc(fmtShort(ymd(t.date))) + "</span>" +
+          "<button type=\"button\" class=\"task-name\" data-task=\"" + esc(t.id) + "\">" + esc(t.title) + "</button>" +
+          "<span class=\"state\">" + state + "</span></div>";
+        if (doing) html += "<div class=\"meter thin\"><span data-doing style=\"width:4%\"></span></div>";
+        if (openTask === t.id) {
+          html += "<div class=\"task-body\">" + md(t.body) +
+            (drafted ? "<div class=\"actions\"><button type=\"button\" class=\"secondary\" data-ack=\"" + esc(t.id) + "\">" + (office.acked[t.id] ? "รับทราบแล้ว" : "รับทราบร่างนี้") + "</button></div>" : "") +
+            "</div>";
+        }
+        html += "</li>";
+      }
+      html += "</ul></article>";
+    }
+  }
+  const pulses = office.pulses.slice().reverse().slice(0, 8);
+  if (pulses.length) {
+    html += "<p class=\"label\">บันทึกประจำวัน</p><ul class=\"tl\">";
+    if (office.pulseDropped) html += "<li><p class=\"foot\">ก่อนหน้านี้มีบันทึกอีก " + office.pulseDropped + " วัน เก็บรายวันล่าสุดไว้บนเครื่องนี้</p></li>";
+    for (const p of pulses) {
+      html += "<li><div class=\"when\"><span>" + esc(fmtLong(ymd(p.date))) + "</span></div><ul>" +
+        p.titles.map(title => "<li>" + esc(title) + "</li>").join("") + "</ul></li>";
+    }
+    html += "</ul>";
+  }
+  html += "<p class=\"foot\">ปิดแท็บได้ สำนักงานนับตามวันจริง เมื่อเปิดอีกครั้งจะร่างทุกงานที่วันผ่านไปแล้ว และถ้าระหว่างเปิดค้างข้ามเที่ยงคืน งานของวันใหม่จะเริ่มเอง บันทึกอยู่บนเครื่องนี้เท่านั้น</p>" +
+    "<div class=\"actions\"><button type=\"button\" class=\"secondary\" id=\"resetOffice\">ล้างความจำสำนักงานบนเครื่องนี้</button></div>";
+  $("sheetBody").innerHTML = html;
+  $("sheetBody").querySelectorAll("[data-task]").forEach(btn => {
+    btn.onclick = () => {
+      openTask = openTask === btn.dataset.task ? null : btn.dataset.task;
+      paintedSig = "";
+      renderOffice(true);
+    };
+  });
+  $("sheetBody").querySelectorAll("[data-ack]").forEach(btn => {
+    btn.onclick = () => {
+      office.acked[btn.dataset.ack] = new Date().toISOString();
+      saveOffice();
+      paintedSig = "";
+      renderOffice(true);
+    };
+  });
+  const reset = $("resetOffice");
+  if (reset) reset.onclick = () => {
+    if (!confirm("ล้างร่างและการรับทราบบนเครื่องนี้ แล้วให้สำนักงานสร้างตามปฏิทินใหม่อีกครั้ง")) return;
+    office = blankState();
+    openTask = null;
+    saveOffice();
+    reconcile();
+    paintedSig = "";
+    renderOffice(true);
+  };
+}
+function openWork() {
+  current = "work";
+  $("sheet").style.setProperty("--c", "#e2283b");
+  $("sheetSwatch").style.background = "#e2283b";
+  $("sheetTag").textContent = "OFFICE GROWTH";
+  $("sheetTitle").textContent = "งานของสำนักงาน";
+  $("composer").hidden = true;
+  paintWork();
+  $("sheet").hidden = false;
+  document.body.classList.add("sheet-open");
+  if (window.__layout) window.__layout();
+  if (window.__syncTalk) window.__syncTalk();
+  $("sheetBody").scrollTop = 0;
+}
+function officeStep() {
+  const changed = reconcile();
+  if (changed) renderOffice(true);
+  else paintDoingBar();
+  const now = Date.now();
+  if (now - beatPaint > 30000) {
+    beatPaint = now;
+    office.lastBeat = now;
+    saveOffice();
+    const beat = $("beat");
+    if (beat) beat.textContent = "ชีพจร " + new Intl.DateTimeFormat("th-TH", { hour: "2-digit", minute: "2-digit" }).format(new Date());
+  }
+}
+function bootOffice() {
+  if (officeTimer) return;
+  office = loadOffice();
+  reconcile();
+  const beat = $("beat");
+  if (beat) beat.textContent = "ชีพจร " + new Intl.DateTimeFormat("th-TH", { hour: "2-digit", minute: "2-digit" }).format(new Date());
+  beatPaint = Date.now();
+  office.lastBeat = beatPaint;
+  renderOffice(true);
+  const btn = $("workBtn");
+  if (btn) btn.onclick = () => openWork();
+  const banner = $("workBanner");
+  if (banner) banner.onclick = () => openWork();
+  officeTimer = setInterval(officeStep, 1000);
+  window.__growthDigest = growthDigest;
+  window.__officeRender = () => renderOffice(true);
+  window.__AMI = {
+    nodes: () => NODES.map(n => ({ id: n.id, unlock: n.unlock, phase: n.phase })),
+    tasks: () => allTasks(),
+    state: () => office,
+    setDay: d => { clockOverride = d; office.doing = null; reconcile(); paintedSig = ""; renderOffice(true); },
+    setWorkMs: ms => { workMs = ms; },
+  };
+}
+
+
 /* ---------- Helpers ---------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -511,6 +1293,7 @@ function rulesFor(a) {
     planContext(),
     "",
     "วันนี้คือ " + fmtLong(TODAY) + (NEXT ? " งานถัดไปคือ " + NEXT.title + " วันที่ " + fmtLong(NEXT.d) + " (" + daysText(daysTo(NEXT.d)) + ")" : ""),
+    window.__growthDigest ? window.__growthDigest() : "",
     "",
     "กติกาการตอบ:",
     "- ตอบภาษาไทย สั้นและตรง ใช้หัวข้อย่อยหรือรายการลำดับได้ ห้ามใช้ตาราง",
@@ -633,15 +1416,17 @@ function agentBody(a) {
 
 function meetingFallback() {
   const n = NEXT;
+  const growth = window.__growthDigest ? window.__growthDigest() + "\n\n" : "";
   const head = n ? "งานถัดไป: **" + n.title + "** " + fmtLong(n.d) + " (" + daysText(daysTo(n.d)) + ")" : "ระยะที่ 1 ครบทุกวันในแผนแล้ว ต่อด้วยระยะที่ 2 · ปรับโครงสร้าง";
   const todo = n ? n.items : LATER[0].items;
-  return "**ประชุมเช้า · " + fmtLong(TODAY) + "**\n" + head + "\n" +
+  const out = "**ประชุมเช้า · " + fmtLong(TODAY) + "**\n" + head + "\n" +
     "- **ล่าสินค้า:** เตรียมรายการให้ถึง " + NEXT_SKU.sku + " SKU ภายใน " + fmtShort(NEXT_SKU.d) + " ทุกรุ่นต้องให้ Procurement ยืนยันสต็อก\n" +
     "- **อ่านข่าว:** เฝ้าดู 11.11, 12.12 และข่าวโรงงานใหม่ใน EEC\n" +
     "- **ลูกค้ารายใหญ่:** แยกลูกค้าเดิมที่ซื้อซ้ำเป็น 4 กลุ่ม เพื่อหาลูกค้าประจำราว 30 ราย (สมมติฐาน)\n" +
     "- **Middle Property:** เตรียมโครงประกาศและ 5 คำถามคัดกรองลีด\n" +
     "- **Risk Desk:** ออเดอร์เฉลี่ยเป้าหมาย ฿5,000 ต้องมีเครื่องพิมพ์ในออเดอร์ส่วนใหญ่\n\n" +
     "**ทำวันนี้**\n" + todo.map((x, i) => (i + 1) + ". " + x).join("\n");
+  return growth + out;
 }
 function meetingBody(t) {
   const body = $("sheetBody");
@@ -772,6 +1557,8 @@ let goTo = id => openSheet(id);
 document.addEventListener("keydown", e => {
   if (e.key === "Escape" && !$("sheet").hidden) { closeSheet(); }
 });
+
+bootOffice();
 
 /* ---------- 3D office ---------- */
 const hasGL = typeof THREE !== "undefined" && (() => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl") || c.getContext("experimental-webgl")); } catch (e) { return false; } })();
@@ -1033,6 +1820,30 @@ for (const [x, z] of [[-20.6, -12.4], [20.6, -12.4], [-20.6, 14.6], [20.6, 14.6]
   const cone = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.9, 7), mat(0x2f9e6a)); cone.position.set(x, 1.5, z); scene.add(cone);
   addBox(x - 0.45, x + 0.45, z - 0.45, z + 0.45);
 }
+
+/* floor seals: one lamp per unlocked work node */
+const lampMeshes = new Map();
+window.__syncLamps = items => {
+  const keep = new Set(items.map(i => i.id));
+  for (const [id, mesh] of lampMeshes) {
+    if (!keep.has(id)) { scene.remove(mesh); lampMeshes.delete(id); }
+  }
+  for (const item of items) {
+    let mesh = lampMeshes.get(item.id);
+    if (!mesh) {
+      const matL = new THREE.MeshStandardMaterial({ color: item.color, emissive: item.color, emissiveIntensity: 0.35, roughness: 0.45, metalness: 0.08 });
+      mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.07, 20), matL);
+      mesh.position.set(item.x, 0.05, item.z);
+      scene.add(mesh);
+      lampMeshes.set(item.id, mesh);
+    }
+    mesh.material.color.set(item.color);
+    mesh.material.emissive.set(item.color);
+    mesh.material.emissiveIntensity = item.hot ? 0.95 : 0.28;
+    mesh.scale.setScalar(item.hot ? 1.18 : 1);
+  }
+};
+if (window.__officeRender) window.__officeRender();
 
 /* player */
 const player = figure(0x2f6be3, false);
