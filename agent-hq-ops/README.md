@@ -1,0 +1,74 @@
+# Agent HQ · Live Ops
+
+Next phase of `middle-agent-hq.html`: a lead-operations app for the Middle Property team.
+PRD: https://claude.ai/artifact/EkmLhveQj2Ve63QpePY7uH
+
+Stages: PRD → **Skeleton (M0)** → Vertical slice (M1) → MVP (M2) → QA + UAT → Release (M3).
+
+## Run
+
+```sh
+npm install
+npm run dev        # local dev server
+npm test           # unit tests (Vitest)
+npm run build      # type-check + production build
+npm run e2e        # e2e + axe + screenshots (needs the build; uses the pre-installed Playwright)
+npm run build:artifact   # one self-contained file: dist-artifact/agent-hq-ops.html
+npm run e2e:artifact     # checks that file: no network, runtime path, dark mode + axe
+VITE_SHEET_ID=<test sheet id> npm run build:test-sheet   # artifact fragment wired to a TEST sheet: dist-artifact/agent-hq-ops-test-sheet.html
+npm run e2e:live         # TEST build (vite --mode e2e-live): live path in a browser on a fake in-page connector
+```
+
+`e2e:live` builds a separate test bundle in `dist-e2e-live/` where every feature is live and the sheet id is a fake one. It is never published; `e2e:artifact` checks that the publish build contains none of it and marks no feature live.
+
+Evidence lands in `test-results/` (`e2e.json`, `axe.json`, `screens/*.png`).
+
+## How it is built
+
+- `src/config/status.ts` — the only place that says live / demo / not_connected. The utility-bar badge and the "สถานะระบบ" page read it.
+- `src/data/store.ts` — the store boundary. Every write checks permission, then validation, then returns `{ ok: false, status: 'not_connected', message }` until the sheet writer passes its gate. The UI shows that message and never shows a success it did not get.
+- `src/data/sheetClient.ts` — the `SheetClient` interface (read / update / append) the store uses to reach a sheet, plus `MemorySheetClient` for tests. No real Google Sheets client is wired in yet.
+- `src/data/connectorSheetClient.ts` — the real `SheetClient`: calls the viewer's claude.ai **Google Sheets** connector (`get_values`, `update_values`, `append_values` with `spreadsheetId`, `range`, `values`) through the artifact `mcp` capability. Each connector error code keeps its own Thai fix message; a write that times out says it may or may not have landed; an unreadable payload is an error, never an empty sheet.
+- `src/config/sheet.ts` — the sheet id. Empty in the repo.
+- On load the app paints the demo rows at once, then runs the connection check; only when the check reaches the sheet does it swap in the connector client (writes stay gated by config). A failed live read falls back to demo rows with the reason shown.
+- `src/data/runtime.ts` — a read-only connection check (header row only) shown on the "สถานะระบบ" page. It never turns writes on: that is still config.
+- `src/data/audit.ts` — one audit row per written cell (time, actor, role, action, lead id, column, before, after). Name, contact and note values are replaced with "(ข้อมูลส่วนตัว)".
+- A write reaches the sheet only when its feature **and** the audit log are `live` in config **and** a client is set. Before writing it re-reads the row and stops if the lead id or stage changed (FR-05). Stage is written last, so a half-failed close leaves the stage as it was. A failed write returns `error`; a write that landed but could not be fully logged or finished returns `partial` with the cells written — never `ok`.
+- `src/rules/` — stages, roles (FR-03), validation, sheet parsing, the row re-check (FR-05), the follow-up queue (FR-08) and HTML escaping. All pure functions with unit tests.
+- No personal data in the URL, `localStorage`, `sessionStorage`, analytics or logs: state lives in memory only.
+- Demo rows (`src/data/demo.ts`) hold no prices, budgets or real people, and every screen that shows them says "ข้อมูลสาธิต".
+
+## Increments
+
+| # | What | Unit | E2E |
+| --- | --- | --- | --- |
+| Fix | The badge now follows what was actually read (`src/rules/badge.ts`): a live build says "กำลังเชื่อมชีต…" until the sheet answers and "เชื่อมชีตไม่ได้ (แสดงข้อมูลสาธิต)" when it falls back, instead of always "ทำงานจริง". Found during the owner's T4 run. Test-sheet artifact v3 | 86/86 (+4) | 18/18 + artifact 6/6 + live 11/11 (+1: connector refuses → badge not live) |
+| B1 | Real viewer identity: `src/data/identity.ts` reads claude.ai's `user` capability (scopes profile + email). The audit log's "ผู้ทำ" gets the viewer's email, else the opaque claude.ai id, else "ไม่ระบุตัวตน"; the display name is shown in the header only, never written. Test-sheet artifact republished (v2) with `user` declared | 82/82 (+8) | 18/18 (+1) + artifact 6/6 + live 10/10 (actor = email, name not in log) |
+| M1c | Published to a TEST sheet ("Agent HQ Ops — ชีตทดสอบ", created for this) as a private claude.ai artifact with `mcp: Google Sheets [get_values, update_values, append_values]`. Fits the artifact page contract: plain `#board`-style routes, safe-area side gutters, `color-scheme: dark` in the dark tokens, fragment output (`--fragment`). `build:test-sheet` takes the sheet id from `VITE_SHEET_ID` at build time; the repo keeps it empty. The role switcher no longer drags the badge to "ข้อมูลสาธิต" | 74/74 | 17/17 + artifact 6/6 + live 10/10; T1–T5 on the real test sheet: waiting for the owner's run in claude.ai |
+| M1f | Set the next follow-up date from the lead drawer (FR-08 action): agent and lead, open leads only, a real date today or later; same gate, row re-check and audit row as every write; new `followUp` feature in the status config | 74/74 (+9) | 17/17 (+1) + artifact 6/6 + live 10/10 (+1: set to today → shows on the due page) |
+| M1e | Browser e2e of the live path on a fake "Google Sheets" connector: T1 live read, T3 move (one cell + one audit row, drawer re-opens), T4 re-sorted sheet (conflict, nothing written, reload re-opens the right lead), T5 close, partial close, T6 lost with reason redacted, add lead, T8 no PII / no network; guard that the publish build stays not_connected | 65/65 | 16/16 + artifact 6/6 (+1) + live 9/9 (new) |
+| M1d | Reload after writes: a success re-reads the sheet and re-opens the lead by id; conflict / partial / error offer a "โหลดข้อมูลใหม่" button; not_connected / forbidden / invalid change nothing. Board shows when the data was loaded and has its own reload button | 65/65 (+6) | 16/16 (+2) + artifact 5/5 |
+| M1c-prep | Publish-ready single-file build (`build:artifact`), app swaps in the connector client when the read-only check passes, dark-mode tokens for the artifact page contract | 59/59 | 14/14 + artifact 5/5 (no network, runtime path without id, dark-mode axe at 360/1280) |
+| M1b | Google Sheets client over the claude.ai connector, error-code messages, ambiguous-write message, read-only connection check on the status page | 59/59 (+14) | 14/14 (+1) |
+| M1a | Sheet write path behind the gate: `SheetClient` + in-memory client, live read, add lead (next `L-0001` id, same format as the current page), move, close, lost, FR-05 row and stage re-check, audit rows without personal data, partial/error results | 45/45 (+15) | 13/13 (UI unchanged; still not_connected) |
+| M0 | Skeleton: status config, store boundary, rules, 5 pages (board, new lead, due follow-ups, audit log, system status), lead drawer with move / close / lost, demo role switcher, a11y basics | 30/30 | 13/13 (axe: 0 violations on 12 page/size checks) |
+
+## Not yet tested
+
+- Real Google Sheets reads and writes from the published page: the connector client is tested against a fake runtime. The `get_values` result shape was confirmed with a real read of the test sheet (`{range, values}`, and `{range}` alone for an empty range). Config still says not_connected, so the app never takes the write path.
+- Running inside claude.ai as an artifact (the app is not published; publishing needs your approval).
+- Two people writing the same row at the same moment: the re-check narrows the window but the sheet API has no compare-and-set.
+- Screen readers (NVDA / VoiceOver) — only axe and keyboard checks so far.
+- Core Web Vitals on a deployed build.
+- Real Thai web fonts: the container blocks Google Fonts, so screenshots use fallback fonts.
+
+## Still missing (owner decisions or later increments)
+
+- Who has which role, and how a viewer proves who they are.
+- Audit log tab ("บันทึก") in the sheet, with the header row `เวลา, ผู้ทำ, บทบาท, การกระทำ, รหัสลีด, คอลัมน์, ค่าเดิม, ค่าใหม่`.
+- The id of a TEST sheet (not the live lead sheet) for `src/config/sheet.ts`, and approval to publish the app as a private artifact that declares `mcp: {servers: [{server: "Google Sheets", tools: ["get_values", "update_values", "append_values"]}]}`.
+- Whether "ปิดไม่ได้" reasons come from a fixed list.
+- Whether a stage can be moved back, and by whom.
+- Audit "ผู้ทำ": I write the staff member's email (readable in the sheet) rather than claude.ai's opaque id, which the platform recommends for stored state; confirm that staff emails may sit in the audit tab.
+- Follow-up dates: I assumed "today or later" and that agents and leads may both set them; confirm or change.
+- Retention period for lost leads (PDPA).
